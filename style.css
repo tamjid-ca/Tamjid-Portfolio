@@ -1,0 +1,16 @@
+
+/* variable color and dark light mode */
+:root{
+    --bg-black-900:rgb(0, 0, 0);
+    --bg-black-100:#fdf9ff;
+    --bg-black-50:#e8dfec;
+    --text-black-900:#060606;
+    --text-black-700:#504e70;
+}
+body.dark{
+        --bg-black-900:linear-gradient(90deg, #2C3E50 35%,  #4CA1AF 100%);
+        --bg-black-100:#222222;
+        --bg-black-50:#393939;
+        --text-black-900:white;
+        --text-black-700:#e9e9e9;
+}

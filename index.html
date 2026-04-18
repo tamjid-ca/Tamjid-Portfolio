@@ -1,50 +1,175 @@
-<!DOCTYPE html>
-<html lang="en"></html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MD. Tamjid Hossain</title>
 
-    <!-- website link title -->
-    <title>Tamjid Hossain</title>
-    <link rel="icon" type="image/x-icon" href="/assets/icon.png">
+    <!--
+    - favicon
+  -->
+    <link
+      rel="shortcut icon"
+      href="./assets/images/icon.svg"
+      type="image/x-icon"
+    />
 
-    <!-- style file -->
-    <link rel="stylesheet" href="./style.css">
+    <!--
+    - custom css link
+  -->
+    <link rel="stylesheet" href="./assets/css/style.css" />
 
-    <!-- link of fontawesome -->
-    <script src="https://kit.fontawesome.com/956459c634.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!--
+    - google font link
+  -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
 
+  <body>
+    <!-- Main -->
 
-    <!-- Style switcher -->
-    <link rel="stylesheet" href="./style-switcher.css">
-    
+    <main>
+      <!-- Sidebar -->
+      <aside class="sidebar" data-sidebar>
 
-</head>
-<body>
+        <!-- sidebar info -->
+        <div class="sidebar-info">
+            <figure class="avatar-box">
+                <img src="./assets/images/my-avatar.jpg" alt="MD. Tamjid Hossain" width="80" />
+            </figure>
 
-    <div id="header">
-    <div class="container box">
-        
-        <!-- navigation header -->
-         <nav>
-            <ul>
-                <img src="assets/logo.png" class="logo">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <i class="fas fa-times" onclick="closemenu()"></i>
-            </ul>
-        </nav>
+            <div class="info-content">
+                <h1 class="name" title="MD. Tamjid Hossain">MD. Tamjid Hossain</h1>
+                <p class="title">IT enthusiast</p>
+            </div>
+            <button class="info_more-btn" data-sidebar-btn>
+                <span>Show Contacts</span>
+                <ion-icon name="chevron-down"></ion-icon>
+            </button>
+        </div>
 
+        <!-- sidebar info more -->
+         <div class="sidebar-info_more">
 
+         <div class="separator"></div>
+         <ul class="contacts-list">
+            <!-- Email -->
+            <li class="contact-item">
+                <div class="icon-box">
+                    <ion-icon name="mail-outline"></ion-icon>
+                </div>
+                <div class="contact-info">
+                    <p class="contact-title">Email</p>
+                    <a href="mailto:mdtamjidhossain.ca@gmail.com" class="contact-link">mdtamjidhossain.ca@gmail.com</a>
+                </div>
+            </li>
 
+            <!-- Phone -->
+            <li class="contact-item">
 
-    </div>
+            <div class="icon-box">
+              <ion-icon name="phone-portrait-outline"></ion-icon>
+            </div>
 
-    </div>
+            <div class="contact-info">
+              <p class="contact-title">Phone</p>
 
-</body>
+              <a href="tel:+123456789" class="contact-link">123456789</a>
+            </div>
+
+          </li>
+
+          <!-- Birthday -->
+          <li class="contact-item">
+
+            <div class="icon-box">
+              <ion-icon name="calendar-outline"></ion-icon>
+            </div>
+
+            <div class="contact-info">
+              <p class="contact-title">Birthday</p>
+
+              <time datetime="1982-06-23">Random Birthday</time>
+            </div>
+
+          </li>
+
+          <!-- Location -->
+          <li class="contact-item">
+
+            <div class="icon-box">
+              <ion-icon name="location-outline"></ion-icon>
+            </div>
+
+            <div class="contact-info">
+              <p class="contact-title">Location</p>
+
+              <address>Canda</address>
+            </div>
+
+          </li>
+
+         </ul>
+
+         <div class="separator"></div>
+
+         <!-- social links -->
+          <ul class="social-list">
+
+            <!-- Github -->
+            <li class="social-item">
+            <a href="#" class="social-link">
+              <ion-icon name="logo-github"></ion-icon>
+            </a>
+          </li>
+
+          <!-- LinkedIn -->
+          <li class="social-item">
+            <a href="#" class="social-link">
+              <ion-icon name="logo-linkedin"></ion-icon>
+            </a>
+          </li>
+
+          <!-- Facebook -->
+          <li class="social-item">
+            <a href="#" class="social-link">
+              <ion-icon name="logo-facebook"></ion-icon>
+            </a>
+          </li>
+
+          </ul>
+
+         </div>
+
+      </aside>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        Main contennt
+      </div>
+    </main>
+
+    <!--
+    - custom js link
+  -->
+    <script src="./assets/js/script.js"></script>
+
+    <!--
+    - ionicon link
+  -->
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"
+    ></script>
+  </body>
 </html>

@@ -37,230 +37,554 @@
     <main>
       <!-- Sidebar -->
       <aside class="sidebar" data-sidebar>
-
         <!-- sidebar info -->
         <div class="sidebar-info">
-            <figure class="avatar-box">
-                <img src="./assets/images/my-avatar.jpg" alt="MD. Tamjid Hossain" width="80" />
-            </figure>
+          <figure class="avatar-box">
+            <img
+              src="./assets/images/my-avatar.jpg"
+              alt="MD. Tamjid Hossain"
+              width="80"
+            />
+          </figure>
 
-            <div class="info-content">
-                <h1 class="name" title="MD. Tamjid Hossain">MD. Tamjid Hossain</h1>
-                <p class="title">IT enthusiast</p>
-            </div>
-            <button class="info_more-btn" data-sidebar-btn>
-                <span>Show Contacts</span>
-                <ion-icon name="chevron-down"></ion-icon>
-            </button>
+          <div class="info-content">
+            <h1 class="name" title="MD. Tamjid Hossain">MD. Tamjid Hossain</h1>
+            <p class="title">IT enthusiast</p>
+          </div>
+          <button class="info_more-btn" data-sidebar-btn>
+            <span>Show Contacts</span>
+            <ion-icon name="chevron-down"></ion-icon>
+          </button>
         </div>
 
         <!-- sidebar info more -->
-         <div class="sidebar-info_more">
-
-         <div class="separator"></div>
-         <ul class="contacts-list">
+        <div class="sidebar-info_more">
+          <div class="separator"></div>
+          <ul class="contacts-list">
             <!-- Email -->
             <li class="contact-item">
-                <div class="icon-box">
-                    <ion-icon name="mail-outline"></ion-icon>
-                </div>
-                <div class="contact-info">
-                    <p class="contact-title">Email</p>
-                    <a href="mailto:mdtamjidhossain.ca@gmail.com" class="contact-link">mdtamjidhossain.ca@gmail.com</a>
-                </div>
+              <div class="icon-box">
+                <ion-icon name="mail-outline"></ion-icon>
+              </div>
+              <div class="contact-info">
+                <p class="contact-title">Email</p>
+                <a
+                  href="mailto:mdtamjidhossain.ca@gmail.com"
+                  class="contact-link"
+                  >mdtamjidhossain.ca@gmail.com</a
+                >
+              </div>
             </li>
 
             <!-- Phone -->
             <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="phone-portrait-outline"></ion-icon>
+              </div>
 
-            <div class="icon-box">
-              <ion-icon name="phone-portrait-outline"></ion-icon>
-            </div>
+              <div class="contact-info">
+                <p class="contact-title">Phone</p>
 
-            <div class="contact-info">
-              <p class="contact-title">Phone</p>
+                <a href="tel:+123456789" class="contact-link">123456789</a>
+              </div>
+            </li>
 
-              <a href="tel:+123456789" class="contact-link">123456789</a>
-            </div>
+            <!-- Birthday -->
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
 
-          </li>
+              <div class="contact-info">
+                <p class="contact-title">Birthday</p>
 
-          <!-- Birthday -->
-          <li class="contact-item">
+                <time datetime="1982-06-23">Random Birthday</time>
+              </div>
+            </li>
 
-            <div class="icon-box">
-              <ion-icon name="calendar-outline"></ion-icon>
-            </div>
+            <!-- Location -->
+            <li class="contact-item">
+              <div class="icon-box">
+                <ion-icon name="location-outline"></ion-icon>
+              </div>
 
-            <div class="contact-info">
-              <p class="contact-title">Birthday</p>
+              <div class="contact-info">
+                <p class="contact-title">Location</p>
 
-              <time datetime="1982-06-23">Random Birthday</time>
-            </div>
-
-          </li>
-
-          <!-- Location -->
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="location-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Location</p>
-
-              <address>Canda</address>
-            </div>
-
-          </li>
-
-         </ul>
-
-         <div class="separator"></div>
-
-         <!-- social links -->
-          <ul class="social-list">
-
-            <!-- Github -->
-            <li class="social-item">
-            <a href="#" class="social-link">
-              <ion-icon name="logo-github"></ion-icon>
-            </a>
-          </li>
-
-          <!-- LinkedIn -->
-          <li class="social-item">
-            <a href="#" class="social-link">
-              <ion-icon name="logo-linkedin"></ion-icon>
-            </a>
-          </li>
-
-          <!-- Facebook -->
-          <li class="social-item">
-            <a href="#" class="social-link">
-              <ion-icon name="logo-facebook"></ion-icon>
-            </a>
-          </li>
-
+                <address>Canda</address>
+              </div>
+            </li>
           </ul>
 
-         </div>
+          <div class="separator"></div>
 
+          <!-- social links -->
+          <ul class="social-list">
+            <!-- Github -->
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <ion-icon name="logo-github"></ion-icon>
+              </a>
+            </li>
+
+            <!-- LinkedIn -->
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <ion-icon name="logo-linkedin"></ion-icon>
+              </a>
+            </li>
+
+            <!-- Facebook -->
+            <li class="social-item">
+              <a href="#" class="social-link">
+                <ion-icon name="logo-facebook"></ion-icon>
+              </a>
+            </li>
+          </ul>
+        </div>
       </aside>
 
       <!-- Main Content -->
       <div class="main-content">
-        
         <!-- Navbar -->
-         <nav class="navbar">
-            <ul class="navbar-list">
-                <li class="navbar-item">
-                    <button class="navbar-link active" data-nav-link>
-                        About
-                    </button>
-                </li>
-                <li class="navbar-item">
-                    <button class="navbar-link" data-nav-link>Resume</button>
-                </li>
+        <nav class="navbar">
+          <ul class="navbar-list">
+            <li class="navbar-item">
+              <button class="navbar-link active" data-nav-link>About</button>
+            </li>
 
-                <li class="navbar-item">
-                    <button class="navbar-link" data-nav-link>Portfolio</button>
-                </li>
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Resume</button>
+            </li>
 
-                <li class="navbar-item">
-                    <button class="navbar-link" data-nav-link>Blog</button>
-                </li>
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Portfolio</button>
+            </li>
 
-                <li class="navbar-item">
-                    <button class="navbar-link" data-nav-link>Contact</button>
-                </li>
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Blog</button>
+            </li>
+
+            <li class="navbar-item">
+              <button class="navbar-link" data-nav-link>Contact</button>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- About Page -->
+        <article class="about active" data-page="about">
+          <!-- header title -->
+          <header>
+            <h2 class="h2 article-title">About Me</h2>
+          </header>
+
+          <!-- about text -->
+          <section class="about-text">
+            <p>
+              I am a passionate web developer with experience in creating
+              responsive and user-friendly websites. I specialize in HTML, CSS,
+              and JavaScript, and I am always eager to learn new technologies
+              and improve my skills.
+            </p>
+            <p>
+              I have a strong foundation in front-end development and enjoy
+              creating intuitive user experiences. My goal is to contribute to
+              meaningful projects that make a positive impact.
+            </p>
+          </section>
+
+          <!-- Service Section -->
+          <section class="service">
+            <h3 class="h3 service-title">What i'm doing</h3>
+            <ul class="service-list">
+              <!-- service 1 -->
+              <li class="service-item">
+                <div class="service-icon-box">
+                  <img
+                    src="./assets/images/icon-design.svg"
+                    alt="design icon"
+                    width="40"
+                  />
+                </div>
+                <div class="service-cotent-box">
+                  <h4 class="h4 service-item-title">Web design</h4>
+                  <p class="service-item-text">
+                    The most modern and high-quality design made at a
+                    professional level.
+                  </p>
+                </div>
+              </li>
+
+              <!-- service 2 -->
+              <li class="service-item">
+                <div class="service-icon-box">
+                  <img
+                    src="./assets/images/icon-design.svg"
+                    alt="design icon"
+                    width="40"
+                  />
+                </div>
+                <div class="service-cotent-box">
+                  <h4 class="h4 service-item-title">Web design</h4>
+                  <p class="service-item-text">
+                    The most modern and high-quality design made at a
+                    professional level.
+                  </p>
+                </div>
+              </li>
+
+              <!-- service 3 -->
+              <li class="service-item">
+                <div class="service-icon-box">
+                  <img
+                    src="./assets/images/icon-design.svg"
+                    alt="design icon"
+                    width="40"
+                  />
+                </div>
+                <div class="service-cotent-box">
+                  <h4 class="h4 service-item-title">Web design</h4>
+                  <p class="service-item-text">
+                    The most modern and high-quality design made at a
+                    professional level.
+                  </p>
+                </div>
+              </li>
+
+              <!-- service 4 -->
+              <li class="service-item">
+                <div class="service-icon-box">
+                  <img
+                    src="./assets/images/icon-design.svg"
+                    alt="design icon"
+                    width="40"
+                  />
+                </div>
+                <div class="service-cotent-box">
+                  <h4 class="h4 service-item-title">Web design</h4>
+                  <p class="service-item-text">
+                    The most modern and high-quality design made at a
+                    professional level.
+                  </p>
+                </div>
+              </li>
             </ul>
+          </section>
 
-         </nav>
+          <!-- Testimonial section -->
+          <section class="testimonials">
+            <h3 class="h3 testimonials-title">Testimonials</h3>
 
-         <!-- About Page -->
-          <article class="about active" data-page="about">
-            <!-- header title -->
-            <header>
-                <h2 class="h2 article-title">About Me</h2>
-            </header>
+            <ul class="testimonials-list has-scrollbar">
+              <li class="testimonials-item">
+                <div class="content-card" data-testimonials-item>
+                  <figure class="testimonials-avatar-box">
+                    <img
+                      src="./assets/images/my-avatar.jpg"
+                      alt="Daniel lewis"
+                      width="60"
+                      data-testimonials-avatar
+                    />
+                  </figure>
 
-            <!-- about text -->
-             <section class="about-text">
-                <p>
-                    I am a passionate web developer with experience in creating responsive and user-friendly websites. I specialize in HTML, CSS, and JavaScript, and I am always eager to learn new technologies and improve my skills.
+                  <h4
+                    class="h4 testimonials-item-title"
+                    data-testimonials-title
+                  >
+                    Daniel lewis
+                  </h4>
+
+                  <div class="testimonials-text" data-testimonials-text>
+                    <p>
+                      Richard was hired to create a corporate identity. We were
+                      very pleased with the work done. She has a lot of
+                      experience and is very concerned about the needs of
+                      client. Lorem ipsum dolor sit amet, ullamcous cididt
+                      consectetur adipiscing elit, seds do et eiusmod tempor
+                      incididunt ut laborels dolore magnarels alia.
+                    </p>
+                  </div>
+                </div>
+              </li>
+
+              <li class="testimonials-item">
+                <div class="content-card" data-testimonials-item>
+                  <figure class="testimonials-avatar-box">
+                    <img
+                      src="./assets/images/my-avatar.jpg"
+                      alt="Jessica miller"
+                      width="60"
+                      data-testimonials-avatar
+                    />
+                  </figure>
+
+                  <h4
+                    class="h4 testimonials-item-title"
+                    data-testimonials-title
+                  >
+                    Jessica miller
+                  </h4>
+
+                  <div class="testimonials-text" data-testimonials-text>
+                    <p>
+                      Richard was hired to create a corporate identity. We were
+                      very pleased with the work done. She has a lot of
+                      experience and is very concerned about the needs of
+                      client. Lorem ipsum dolor sit amet, ullamcous cididt
+                      consectetur adipiscing elit, seds do et eiusmod tempor
+                      incididunt ut laborels dolore magnarels alia.
+                    </p>
+                  </div>
+                </div>
+              </li>
+
+              <li class="testimonials-item">
+                <div class="content-card" data-testimonials-item>
+                  <figure class="testimonials-avatar-box">
+                    <img
+                      src="./assets/images/my-avatar.jpg"
+                      alt="Emily evans"
+                      width="60"
+                      data-testimonials-avatar
+                    />
+                  </figure>
+
+                  <h4
+                    class="h4 testimonials-item-title"
+                    data-testimonials-title
+                  >
+                    Emily evans
+                  </h4>
+
+                  <div class="testimonials-text" data-testimonials-text>
+                    <p>
+                      Richard was hired to create a corporate identity. We were
+                      very pleased with the work done. She has a lot of
+                      experience and is very concerned about the needs of
+                      client. Lorem ipsum dolor sit amet, ullamcous cididt
+                      consectetur adipiscing elit, seds do et eiusmod tempor
+                      incididunt ut laborels dolore magnarels alia.
+                    </p>
+                  </div>
+                </div>
+              </li>
+
+              <li class="testimonials-item">
+                <div class="content-card" data-testimonials-item>
+                  <figure class="testimonials-avatar-box">
+                    <img
+                      src="./assets/images/my-avatar.jpg"
+                      alt="Henry william"
+                      width="60"
+                      data-testimonials-avatar
+                    />
+                  </figure>
+
+                  <h4
+                    class="h4 testimonials-item-title"
+                    data-testimonials-title
+                  >
+                    Henry william
+                  </h4>
+
+                  <div class="testimonials-text" data-testimonials-text>
+                    <p>
+                      Richard was hired to create a corporate identity. We were
+                      very pleased with the work done. She has a lot of
+                      experience and is very concerned about the needs of
+                      client. Lorem ipsum dolor sit amet, ullamcous cididt
+                      consectetur adipiscing elit, seds do et eiusmod tempor
+                      incididunt ut laborels dolore magnarels alia.
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </section>
+
+          <!-- Testimonial Modals -->
+          <div class="modal-container" data-modal-container>
+            <div class="overlay" data-overlay></div>
+            <section class="testimonials-modal">
+              <button class="modal-close-btn" data-modal-close-btn>
+                <ion-icon name="close-outline"></ion-icon>
+              </button>
+
+              <div class="modal-img-wrapper">
+                <figure class="modal-avatar-box">
+                  <img
+                    src="./assets/images/my-avatar.jpg"
+                    alt="Daniel lewis"
+                    width="80"
+                    data-modal-img
+                  />
+                </figure>
+
+                <img src="./assets/images/icon-design.svg" alt="quote icon" />
+              </div>
+
+              <div class="modal-content">
+                <h4 class="h3 modal-title" data-modal-title>Daniel lewis</h4>
+
+                <time datetime="2021-06-14">14 June, 2021</time>
+
+                <div data-modal-text>
+                  <p>
+                    Richard was hired to create a corporate identity. We were
+                    very pleased with the work done. She has a lot of experience
+                    and is very concerned about the needs of client. Lorem ipsum
+                    dolor sit amet, ullamcous cididt consectetur adipiscing
+                    elit, seds do et eiusmod tempor incididunt ut laborels
+                    dolore magnarels alia.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+
+        <!-- Resume Page -->
+        <article class="resume" data-page="resume">
+          <header>
+            <h2 class="h2 article-title">Resume</h2>
+          </header>
+
+          <!-- Timeline -->
+          <section class="timeline">
+            <div class="title-wrapper">
+              <div class="icon-box">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
+              <h3 class="h3">Education</h3>
+            </div>
+            <ol class="timeline-list">
+              <!-- University -->
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">
+                  Master in Computer Science
+                </h4>
+                <span>2008 - 2010</span>
+                <p class="timeline-text">
+                  Nemo enims ipsam voluptatem, blanditiis praesentium voluptum
+                  delenit atque corrupti, quos dolores et quas molestias
+                  exceptur.
                 </p>
-                <p>
-                    I have a strong foundation in front-end development and enjoy creating intuitive user experiences. My goal is to contribute to meaningful projects that make a positive impact.
+              </li>
+              <!-- High School -->
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">
+                  Bachelor in Computer Science
+                </h4>
+                <span>2004 - 2008</span>
+                <p class="timeline-text">
+                  Nemo enims ipsam voluptatem, blanditiis praesentium voluptum
+                  delenit atque corrupti, quos dolores et quas molestias
+                  exceptur.
                 </p>
+              </li>
+            </ol>
+          </section>
 
-             </section>
+          <!-- Experience -->
+          <section class="timeline">
+            <div class="title-wrapper">
+              <div class="icon-box">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
 
-             <!-- Service Section -->
-             <section class="service">
-                <h3 class="h3 service-title">What i'm doing</h3>
-                <ul class="service-list">
-                    <!-- service 1 -->
-                    <li class="service-item">
-                        <div class="service-icon-box">
-                            <img src="./assets/images/icon-design.svg" alt="design icon" width="40">
-                        </div>
-                        <div class="service-cotent-box">
-                            <h4 class="h4 service-item-title">Web design</h4>
-                            <p class="service-item-text">
-                                The most modern and high-quality design made at a professional level.
-                            </p>
-                        </div>
-                    </li>
+              <h3 class="h3">Experience</h3>
+            </div>
 
-                    <!-- service 2 -->
-                    <li class="service-item">
-                        <div class="service-icon-box">
-                            <img src="./assets/images/icon-design.svg" alt="design icon" width="40">
-                        </div>
-                        <div class="service-cotent-box">
-                            <h4 class="h4 service-item-title">Web design</h4>
-                            <p class="service-item-text">
-                                The most modern and high-quality design made at a professional level.
-                            </p>
-                        </div>
-                    </li>
+            <ol class="timeline-list">
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Creative director</h4>
 
-                    <!-- service 3 -->
-                    <li class="service-item">
-                        <div class="service-icon-box">
-                            <img src="./assets/images/icon-design.svg" alt="design icon" width="40">
-                        </div>
-                        <div class="service-cotent-box">
-                            <h4 class="h4 service-item-title">Web design</h4>
-                            <p class="service-item-text">
-                                The most modern and high-quality design made at a professional level.
-                            </p>
-                        </div>
-                    </li>
+                <span>2015 — Present</span>
 
-                    <!-- service 4 -->
-                    <li class="service-item">
-                        <div class="service-icon-box">
-                            <img src="./assets/images/icon-design.svg" alt="design icon" width="40">
-                        </div>
-                        <div class="service-cotent-box">
-                            <h4 class="h4 service-item-title">Web design</h4>
-                            <p class="service-item-text">
-                                The most modern and high-quality design made at a professional level.
-                            </p>
-                        </div>
-                    </li>
+                <p class="timeline-text">
+                  Nemo enim ipsam voluptatem blanditiis praesentium voluptum
+                  delenit atque corrupti, quos dolores et qvuas molestias
+                  exceptur.
+                </p>
+              </li>
 
-                    
-                </ul>
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Art director</h4>
 
-             </section>
+                <span>2013 — 2015</span>
 
-          </article>
+                <p class="timeline-text">
+                  Nemo enims ipsam voluptatem, blanditiis praesentium voluptum
+                  delenit atque corrupti, quos dolores et quas molestias
+                  exceptur.
+                </p>
+              </li>
 
+              <li class="timeline-item">
+                <h4 class="h4 timeline-item-title">Web designer</h4>
 
+                <span>2010 — 2013</span>
+
+                <p class="timeline-text">
+                  Nemo enims ipsam voluptatem, blanditiis praesentium voluptum
+                  delenit atque corrupti, quos dolores et quas molestias
+                  exceptur.
+                </p>
+              </li>
+            </ol>
+          </section>
+
+          <!-- Skills -->
+          <section class="skill">
+            <h3 class="h3 skills-title">My skills</h3>
+
+            <ul class="skills-list content-card">
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Web design</h5>
+                  <data value="80">80%</data>
+                </div>
+
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 80%"></div>
+                </div>
+              </li>
+
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Graphic design</h5>
+                  <data value="70">70%</data>
+                </div>
+
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 70%"></div>
+                </div>
+              </li>
+
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">Branding</h5>
+                  <data value="90">90%</data>
+                </div>
+
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 90%"></div>
+                </div>
+              </li>
+
+              <li class="skills-item">
+                <div class="title-wrapper">
+                  <h5 class="h5">WordPress</h5>
+                  <data value="50">50%</data>
+                </div>
+
+                <div class="skill-progress-bg">
+                  <div class="skill-progress-fill" style="width: 50%"></div>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </article>
       </div>
     </main>
 

@@ -179,7 +179,7 @@ for (let i = 0; i < formInputs.length; i++) {
 }
 
 // PASTE YOUR GOOGLE SCRIPT WEB APP URL HERE
-const scriptURL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+const scriptURL = "";
 
 // handle form submission
 form.addEventListener('submit', e => {

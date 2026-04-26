@@ -115,24 +115,24 @@ for (let i = 0; i < filterBtn.length; i++) {
 
 
 
-// contact form variables
-const form = document.querySelector("[data-form]");
-const formInputs = document.querySelectorAll("[data-form-input]");
-const formBtn = document.querySelector("[data-form-btn]");
+// // contact form variables
+// const form = document.querySelector("[data-form]");
+// const formInputs = document.querySelectorAll("[data-form-input]");
+// const formBtn = document.querySelector("[data-form-btn]");
 
-// add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
+// // add event to all form input field
+// for (let i = 0; i < formInputs.length; i++) {
+//   formInputs[i].addEventListener("input", function () {
 
-    // check form validation
-    if (form.checkValidity()) {
-      formBtn.removeAttribute("disabled");
-    } else {
-      formBtn.setAttribute("disabled", "");
-    }
+//     // check form validation
+//     if (form.checkValidity()) {
+//       formBtn.removeAttribute("disabled");
+//     } else {
+//       formBtn.setAttribute("disabled", "");
+//     }
 
-  });
-}
+//   });
+// }
 
 
 
@@ -157,3 +157,55 @@ for (let i = 0; i < navigationLinks.length; i++) {
 
   });
 }
+
+
+
+
+// contact form variables
+const form = document.querySelector("[data-form]");
+const formInputs = document.querySelectorAll("[data-form-input]");
+const formBtn = document.querySelector("[data-form-btn]");
+
+// add event to all form input field
+for (let i = 0; i < formInputs.length; i++) {
+  formInputs[i].addEventListener("input", function () {
+    // check form validation
+    if (form.checkValidity()) {
+      formBtn.removeAttribute("disabled");
+    } else {
+      formBtn.setAttribute("disabled", "");
+    }
+  });
+}
+
+// PASTE YOUR GOOGLE SCRIPT WEB APP URL HERE
+const scriptURL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+
+// handle form submission
+form.addEventListener('submit', e => {
+  e.preventDefault(); // Prevent the default page reload
+  
+  // Temporarily change the button text so the user knows it's loading
+  const originalBtnText = formBtn.innerHTML;
+  formBtn.innerHTML = '<ion-icon name="paper-plane"></ion-icon><span>Sending...</span>';
+  formBtn.setAttribute("disabled", ""); // Disable button to prevent multiple clicks
+
+  // Send the data to Google Sheets
+  fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+    .then(response => {
+      alert('Message sent successfully!');
+      form.reset(); // Clear the form fields
+      
+      // Reset the button back to normal
+      formBtn.innerHTML = originalBtnText;
+      formBtn.setAttribute("disabled", ""); // Keep disabled until they type again
+    })
+    .catch(error => {
+      console.error('Error!', error.message);
+      alert('Something went wrong. Please try again.');
+      
+      // Reset the button back to normal
+      formBtn.innerHTML = originalBtnText;
+      formBtn.removeAttribute("disabled");
+    });
+});

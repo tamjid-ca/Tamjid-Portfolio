@@ -1,7 +1,8 @@
 import React from 'react';
 import { PortfolioShell } from '@/components/portfolio/PortfolioShell';
-import { V1_PORTFOLIO_SEED_DATA } from '@/seed/v1-portfolio-data';
+import { getCachedPublicPortfolioData } from '@/lib/cache/portfolio-cache';
 
-export default function HomePage() {
-  return <PortfolioShell data={V1_PORTFOLIO_SEED_DATA} />;
+export default async function HomePage() {
+  const data = await getCachedPublicPortfolioData();
+  return <PortfolioShell data={data} />;
 }

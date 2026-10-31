@@ -1,5 +1,9 @@
 import { connectToDatabase } from '@/lib/mongodb/connection';
 import {
+  PORTFOLIO_CACHE_TAGS,
+  revalidatePortfolioCache,
+} from '@/lib/cache/revalidate';
+import {
   achievementInputSchema,
   blogPostInputSchema,
   clientLogoInputSchema,
@@ -226,17 +230,23 @@ export const portfolioService = {
 
   async updateSiteSettings(rawInput: unknown): Promise<SiteSettingsDTO> {
     const validated = validateAndSanitize(siteSettingsInputSchema, rawInput);
-    return siteSettingsRepository.upsert(validated);
+    const updated = await siteSettingsRepository.upsert(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.SETTINGS]);
+    return updated;
   },
 
   async updateProfile(rawInput: unknown): Promise<ProfileDTO> {
     const validated = validateAndSanitize(profileInputSchema, rawInput);
-    return profileRepository.upsert(validated);
+    const updated = await profileRepository.upsert(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROFILE]);
+    return updated;
   },
 
   async createSocialLink(rawInput: unknown): Promise<SocialLinkDTO> {
     const validated = validateAndSanitize(socialLinkInputSchema, rawInput);
-    return socialLinkRepository.create(validated);
+    const created = await socialLinkRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROFILE]);
+    return created;
   },
 
   async updateSocialLink(
@@ -247,16 +257,24 @@ export const portfolioService = {
       socialLinkInputSchema.partial(),
       rawInput
     );
-    return socialLinkRepository.updateById(id, validated);
+    const updated = await socialLinkRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROFILE]);
+    return updated;
   },
 
   async deleteSocialLink(id: string): Promise<boolean> {
-    return socialLinkRepository.deleteById(id);
+    const deleted = await socialLinkRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROFILE]);
+    }
+    return deleted;
   },
 
   async createNavigationItem(rawInput: unknown): Promise<NavigationItemDTO> {
     const validated = validateAndSanitize(navigationItemInputSchema, rawInput);
-    return navigationItemRepository.create(validated);
+    const created = await navigationItemRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.SETTINGS]);
+    return created;
   },
 
   async updateNavigationItem(
@@ -267,12 +285,16 @@ export const portfolioService = {
       navigationItemInputSchema.partial(),
       rawInput
     );
-    return navigationItemRepository.updateById(id, validated);
+    const updated = await navigationItemRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.SETTINGS]);
+    return updated;
   },
 
   async createService(rawInput: unknown): Promise<ServiceDTO> {
     const validated = validateAndSanitize(serviceInputSchema, rawInput);
-    return serviceRepository.create(validated);
+    const created = await serviceRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return created;
   },
 
   async updateService(
@@ -283,16 +305,24 @@ export const portfolioService = {
       serviceInputSchema.partial(),
       rawInput
     );
-    return serviceRepository.updateById(id, validated);
+    const updated = await serviceRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return updated;
   },
 
   async deleteService(id: string): Promise<boolean> {
-    return serviceRepository.deleteById(id);
+    const deleted = await serviceRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    }
+    return deleted;
   },
 
   async createTestimonial(rawInput: unknown): Promise<TestimonialDTO> {
     const validated = validateAndSanitize(testimonialInputSchema, rawInput);
-    return testimonialRepository.create(validated);
+    const created = await testimonialRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return created;
   },
 
   async updateTestimonial(
@@ -303,16 +333,24 @@ export const portfolioService = {
       testimonialInputSchema.partial(),
       rawInput
     );
-    return testimonialRepository.updateById(id, validated);
+    const updated = await testimonialRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return updated;
   },
 
   async deleteTestimonial(id: string): Promise<boolean> {
-    return testimonialRepository.deleteById(id);
+    const deleted = await testimonialRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    }
+    return deleted;
   },
 
   async createClientLogo(rawInput: unknown): Promise<ClientLogoDTO> {
     const validated = validateAndSanitize(clientLogoInputSchema, rawInput);
-    return clientLogoRepository.create(validated);
+    const created = await clientLogoRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return created;
   },
 
   async updateClientLogo(
@@ -323,16 +361,24 @@ export const portfolioService = {
       clientLogoInputSchema.partial(),
       rawInput
     );
-    return clientLogoRepository.updateById(id, validated);
+    const updated = await clientLogoRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    return updated;
   },
 
   async deleteClientLogo(id: string): Promise<boolean> {
-    return clientLogoRepository.deleteById(id);
+    const deleted = await clientLogoRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.ABOUT]);
+    }
+    return deleted;
   },
 
   async createEducation(rawInput: unknown): Promise<EducationDTO> {
     const validated = validateAndSanitize(educationInputSchema, rawInput);
-    return educationRepository.create(validated);
+    const created = await educationRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return created;
   },
 
   async updateEducation(
@@ -343,16 +389,24 @@ export const portfolioService = {
       educationInputSchema.partial(),
       rawInput
     );
-    return educationRepository.updateById(id, validated);
+    const updated = await educationRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return updated;
   },
 
   async deleteEducation(id: string): Promise<boolean> {
-    return educationRepository.deleteById(id);
+    const deleted = await educationRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    }
+    return deleted;
   },
 
   async createExperience(rawInput: unknown): Promise<ExperienceDTO> {
     const validated = validateAndSanitize(experienceInputSchema, rawInput);
-    return experienceRepository.create(validated);
+    const created = await experienceRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return created;
   },
 
   async updateExperience(
@@ -363,30 +417,46 @@ export const portfolioService = {
       experienceInputSchema.partial(),
       rawInput
     );
-    return experienceRepository.updateById(id, validated);
+    const updated = await experienceRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return updated;
   },
 
   async deleteExperience(id: string): Promise<boolean> {
-    return experienceRepository.deleteById(id);
+    const deleted = await experienceRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    }
+    return deleted;
   },
 
   async createSkill(rawInput: unknown): Promise<SkillDTO> {
     const validated = validateAndSanitize(skillInputSchema, rawInput);
-    return skillRepository.create(validated);
+    const created = await skillRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return created;
   },
 
   async updateSkill(id: string, rawInput: unknown): Promise<SkillDTO | null> {
     const validated = validateAndSanitize(skillInputSchema.partial(), rawInput);
-    return skillRepository.updateById(id, validated);
+    const updated = await skillRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return updated;
   },
 
   async deleteSkill(id: string): Promise<boolean> {
-    return skillRepository.deleteById(id);
+    const deleted = await skillRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    }
+    return deleted;
   },
 
   async createAchievement(rawInput: unknown): Promise<AchievementDTO> {
     const validated = validateAndSanitize(achievementInputSchema, rawInput);
-    return achievementRepository.create(validated);
+    const created = await achievementRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return created;
   },
 
   async updateAchievement(
@@ -397,19 +467,27 @@ export const portfolioService = {
       achievementInputSchema.partial(),
       rawInput
     );
-    return achievementRepository.updateById(id, validated);
+    const updated = await achievementRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    return updated;
   },
 
   async deleteAchievement(id: string): Promise<boolean> {
-    return achievementRepository.deleteById(id);
+    const deleted = await achievementRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.RESUME]);
+    }
+    return deleted;
   },
 
   async createProject(rawInput: unknown): Promise<ProjectDTO> {
     const validated = validateAndSanitize(projectInputSchema, rawInput);
-    return projectRepository.create({
+    const created = await projectRepository.create({
       ...validated,
       filterCategory: validated.filterCategory.toLowerCase(),
     });
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROJECTS]);
+    return created;
   },
 
   async updateProject(
@@ -423,11 +501,17 @@ export const portfolioService = {
     if (validated.filterCategory) {
       validated.filterCategory = validated.filterCategory.toLowerCase();
     }
-    return projectRepository.updateById(id, validated);
+    const updated = await projectRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROJECTS]);
+    return updated;
   },
 
   async deleteProject(id: string): Promise<boolean> {
-    return projectRepository.deleteById(id);
+    const deleted = await projectRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROJECTS]);
+    }
+    return deleted;
   },
 
   async reorderProjects(rawInput: unknown): Promise<void> {
@@ -436,11 +520,14 @@ export const portfolioService = {
       rawInput
     );
     await projectRepository.reorder(orderedIds);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROJECTS]);
   },
 
   async createBlogPost(rawInput: unknown): Promise<BlogPostDTO> {
     const validated = validateAndSanitize(blogPostInputSchema, rawInput);
-    return blogPostRepository.create(validated);
+    const created = await blogPostRepository.create(validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.BLOG]);
+    return created;
   },
 
   async updateBlogPost(
@@ -451,11 +538,17 @@ export const portfolioService = {
       blogPostInputSchema.partial(),
       rawInput
     );
-    return blogPostRepository.updateById(id, validated);
+    const updated = await blogPostRepository.updateById(id, validated);
+    revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.BLOG]);
+    return updated;
   },
 
   async deleteBlogPost(id: string): Promise<boolean> {
-    return blogPostRepository.deleteById(id);
+    const deleted = await blogPostRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.BLOG]);
+    }
+    return deleted;
   },
 
   async registerMediaAsset(rawInput: unknown): Promise<MediaAssetDTO> {

@@ -15,11 +15,22 @@ interface PortfolioShellProps {
 }
 
 export function PortfolioShell({ data }: PortfolioShellProps) {
+  const visibleNavItems = [...data.navigationItems]
+    .filter((item) => item.visible)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+
   const defaultNav =
-    data.navigationItems.find((item) => item.isDefault && item.visible)?.slug ??
+    visibleNavItems.find((item) => item.isDefault)?.slug ??
+    visibleNavItems[0]?.slug ??
     'about';
 
   const [activePage, setActivePage] = useState<PortfolioPageSlug>(defaultNav);
+
+  const resolvedActivePage = visibleNavItems.some(
+    (item) => item.slug === activePage
+  )
+    ? activePage
+    : defaultNav;
 
   const handleNavigate = (page: PortfolioPageSlug) => {
     setActivePage(page);
@@ -35,12 +46,12 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
       <div className="main-content">
         <Navbar
           navigationItems={data.navigationItems}
-          activePage={activePage}
+          activePage={resolvedActivePage}
           onNavigate={handleNavigate}
         />
 
         <AboutSection
-          isActive={activePage === 'about'}
+          isActive={resolvedActivePage === 'about'}
           profile={data.profile}
           services={data.services}
           testimonials={data.testimonials}
@@ -48,7 +59,7 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
         />
 
         <ResumeSection
-          isActive={activePage === 'resume'}
+          isActive={resolvedActivePage === 'resume'}
           profile={data.profile}
           education={data.education}
           experience={data.experience}
@@ -57,20 +68,20 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
         />
 
         <PortfolioSection
-          isActive={activePage === 'portfolio'}
+          isActive={resolvedActivePage === 'portfolio'}
           profile={data.profile}
           projects={data.projects}
           categories={data.projectCategories}
         />
 
         <BlogSection
-          isActive={activePage === 'blog'}
+          isActive={resolvedActivePage === 'blog'}
           profile={data.profile}
           blogPosts={data.blogPosts}
         />
 
         <ContactSection
-          isActive={activePage === 'contact'}
+          isActive={resolvedActivePage === 'contact'}
           profile={data.profile}
           siteSettings={data.siteSettings}
         />

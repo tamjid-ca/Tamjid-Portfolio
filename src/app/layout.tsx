@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
-import { V1_PORTFOLIO_SEED_DATA } from '@/seed/v1-portfolio-data';
+import { getCachedPublicPortfolioData } from '@/lib/cache/portfolio-cache';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -10,20 +10,27 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: V1_PORTFOLIO_SEED_DATA.siteSettings.siteTitle,
-  description: V1_PORTFOLIO_SEED_DATA.siteSettings.siteDescription,
-  keywords: V1_PORTFOLIO_SEED_DATA.siteSettings.seoKeywords,
-  icons: {
-    icon: V1_PORTFOLIO_SEED_DATA.siteSettings.faviconUrl,
-    shortcut: V1_PORTFOLIO_SEED_DATA.siteSettings.faviconUrl,
-  },
-  openGraph: {
-    title: V1_PORTFOLIO_SEED_DATA.siteSettings.siteTitle,
-    description: V1_PORTFOLIO_SEED_DATA.siteSettings.siteDescription,
-    type: 'website',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { siteSettings } = await getCachedPublicPortfolioData();
+
+  return {
+    title: siteSettings.siteTitle,
+    description: siteSettings.siteDescription,
+    keywords: siteSettings.seoKeywords,
+    icons: {
+      icon: siteSettings.faviconUrl,
+      shortcut: siteSettings.faviconUrl,
+    },
+    openGraph: {
+      title: siteSettings.siteTitle,
+      description: siteSettings.siteDescription,
+      type: 'website',
+      ...(siteSettings.ogImageUrl
+        ? { images: [{ url: siteSettings.ogImageUrl }] }
+        : {}),
+    },
+  };
+}
 
 export default function RootLayout({
   children,

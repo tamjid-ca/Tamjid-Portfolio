@@ -11,7 +11,7 @@
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose 8.x, Zod 3.24 validation, Argon2id / `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
   - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 2 Completed** (MongoDB connection singleton, input sanitization & Zod validation schemas, 15 Mongoose models with compound indexes, `.lean()` repositories, domain services with automatic seed fallback and reference-safe media deletion, idempotent V1 seed script, and 19/19 passing tests). Ready to begin **Phase 3 — Dynamic Public Portfolio**.
+- **Current Implementation Status:** **Phase 3 Completed** (Dynamic public portfolio wired end-to-end through `getCachedPublicPortfolioData()` using Next.js `unstable_cache` with granular cache tags, automatic tag revalidation on all service mutations, dynamic SEO metadata via `generateMetadata()`, `GET /api/public/portfolio` endpoint, and 23/23 passing tests). Ready to begin **Phase 4 — Cloudinary Integration**.
 
 ---
 
@@ -33,14 +33,13 @@
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/public/contact`, `src/components/portfolio`, `src/components/ui`, `src/lib/mongodb`, `src/lib/security`, `src/lib/validation`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `tests`).
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/public/{contact,portfolio}`, `src/components/portfolio`, `src/components/ui`, `src/lib/{cache,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `tests`).
 - **Component & Data Layer Architecture:**
-  - `src/lib/mongodb/connection.ts`: Global cached Mongoose connection manager (`connectToDatabase`, `disconnectFromDatabase`, `getDatabaseStatus`, `isDatabaseConnected`) with strict and resilient fallback modes.
-  - `src/lib/security/sanitize.ts`: Recursive NoSQL injection operator sanitizer (`stripMongoOperators`) stripping `$` and `.` keys, prototype pollution keys, and null bytes.
-  - `src/lib/validation/portfolio-schemas.ts`: Centralized Zod validation schemas for all 15 portfolio entities plus `validateAndSanitize()`.
-  - `src/models/`: 15 Mongoose models (`SiteSettings`, `Profile`, `SocialLink`, `NavigationItem`, `Service`, `Testimonial`, `ClientLogo`, `Education`, `Experience`, `Skill`, `Achievement`, `Project`, `BlogPost`, `ContactMessage`, `MediaAsset`) with hot-reload guards and compound indexes.
-  - `src/repositories/portfolio-repository.ts`: `.lean()` repositories serializing `_id` -> `id` string DTOs, deterministic `{ displayOrder: 1, createdAt: 1 }` sorting, bulk reordering, and `mediaAssetRepository.findAssetReferences(publicId)`.
-  - `src/services/portfolio-service.ts` & `src/services/contact-service.ts`: Business logic, Zod validation enforcement, `MediaAssetInUseError` reference guard, and automatic fallback to `V1_PORTFOLIO_SEED_DATA` when MongoDB is unconfigured or offline.
+  - `src/lib/cache/portfolio-cache.ts` & `src/lib/cache/revalidate.ts`: Wraps `portfolioService.getPublicPortfolioData()` in Next.js `unstable_cache` with granular cache tags (`portfolio-public`, `portfolio-settings`, `portfolio-profile`, `portfolio-about`, `portfolio-resume`, `portfolio-projects`, `portfolio-blog`) and exposes `revalidatePortfolioCache()` invoked automatically on every service mutation.
+  - `src/app/layout.tsx`: Server Component implementing `generateMetadata()` driven by dynamic `SiteSettings`.
+  - `src/app/(public)/page.tsx`: Async Server Component awaiting `getCachedPublicPortfolioData()` and rendering `<PortfolioShell data={data} />`.
+  - `src/app/api/public/portfolio/route.ts`: Public portfolio snapshot & health endpoint with `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`.
+  - `src/lib/mongodb/connection.ts`, `src/models/*`, `src/repositories/*`, `src/services/*`: Full MongoDB/Mongoose data & service layer with resilient fallback to `V1_PORTFOLIO_SEED_DATA`.
 
 ---
 
@@ -49,18 +48,19 @@
 - **Decision 2 — Inline Ionicons SVG Component:** Replaced external `unpkg.com` runtime scripts with `src/components/ui/IonIcon.tsx`, rendering crisp SVGs synchronously during SSR.
 - **Decision 3 — TypeScript Incremental Build Cache in `/tmp`:** Configured `"tsBuildInfoFile": "/tmp/tsconfig.tsbuildinfo"` in `tsconfig.json` so `npm run typecheck` executes cleanly inside sandboxed environments.
 - **Decision 4 — Deterministic Seed Keys & Natural Slugs for Idempotent Seeding:** Added `singletonKey: 'default'` on `SiteSettings`/`Profile` and `seedKey` (plus `slug` on `NavigationItem`, `Project`, `BlogPost`) so `seedDatabase()` can run repeatedly without creating duplicate documents.
+- **Decision 5 — Decoupled Cache Tag Revalidation (`src/lib/cache/revalidate.ts`):** Separated tag constants and `revalidatePortfolioCache()` into `src/lib/cache/revalidate.ts` to avoid circular imports between `portfolio-cache.ts` and `portfolio-service.ts`, while safely catching non-Next.js runtime contexts during unit tests.
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 2 Completed (Stopped at Phase 2 gate awaiting `continue with context.md` for Phase 3)
+- **Current Phase:** Phase 3 Completed (Stopped at Phase 3 gate awaiting `continue with context.md` for Phase 4)
 - **Completed Phases:**
   - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
   - [x] **Phase 1:** Next.js Foundation (`f5932b5`)
-  - [x] **Phase 2:** MongoDB and Backend Foundation
+  - [x] **Phase 2:** MongoDB and Backend Foundation (`02c832f`)
+  - [x] **Phase 3:** Dynamic Public Portfolio
 - **Pending Phases:**
-  - [ ] **Phase 3:** Dynamic Public Portfolio (Connect all public sections to MongoDB + caching + revalidation)
-  - [ ] **Phase 4:** Cloudinary Integration (Signed uploads, media library, reference-safe deletion)
+  - [ ] **Phase 4:** Cloudinary Integration (Signed uploads, media library, responsive image URLs, reference-safe deletion)
   - [ ] **Phase 5:** Admin Authentication and Authorization (Argon2/scrypt, sessions, rate limiting, route guards)
   - [ ] **Phase 6:** Complete Admin CMS (Full CRUD dashboard for all collections, inbox, ordering, preview)
   - [ ] **Phase 7:** Dark/Light Theme (Dark default + harmonized Light mode tokens + persistence)
@@ -75,23 +75,21 @@
 ## 6. Completed Implementation
 - **Phase 0 Deliverables:** `docs/INITIAL_AUDIT.md`, `docs/DESIGN_INVENTORY.md`, `docs/CONTENT_INVENTORY.md`, `docs/ARCHITECTURE_PLAN.md`, `docs/screenshots/baseline/*`, `AGENTS.md`, `.agents/skills/*`, `plugins/tamjid-portfolio-engineering/`.
 - **Phase 1 Deliverables:** Next.js 15 App Router foundation, `src/app/globals.css`, `src/components/ui/IonIcon.tsx`, `src/components/portfolio/*`, `tests/portfolio-foundation.test.tsx`.
-- **Phase 2 Deliverables:**
-  - MongoDB Connection Layer: `src/lib/mongodb/connection.ts`.
-  - Input Sanitization & Zod Schemas: `src/lib/security/sanitize.ts`, `src/lib/validation/portfolio-schemas.ts`.
-  - Mongoose Models (15 Collections): `src/models/{SiteSettings,Profile,SocialLink,NavigationItem,Service,Testimonial,ClientLogo,Education,Experience,Skill,Achievement,Project,BlogPost,ContactMessage,MediaAsset,index}.ts`.
-  - Repositories: `src/repositories/portfolio-repository.ts`, `src/repositories/index.ts`.
-  - Services: `src/services/portfolio-service.ts`, `src/services/contact-service.ts`, `src/services/index.ts`.
-  - Idempotent Seeding: `src/seed/seed-database.ts`, `src/seed/cli.ts` (`npm run seed`).
-  - Route Handler Integration: `src/app/api/public/contact/route.ts`.
-  - Phase 2 Tests: `tests/mongodb-data-layer.test.ts`.
+- **Phase 2 Deliverables:** `src/lib/mongodb/connection.ts`, `src/lib/security/sanitize.ts`, `src/lib/validation/portfolio-schemas.ts`, `src/models/*` (15 models), `src/repositories/*`, `src/services/*`, `src/seed/{seed-database,cli}.ts`, `tests/mongodb-data-layer.test.ts`.
+- **Phase 3 Deliverables:**
+  - Cache & Revalidation Layer: `src/lib/cache/revalidate.ts`, `src/lib/cache/portfolio-cache.ts`.
+  - Dynamic Public Routes & Metadata: `src/app/layout.tsx` (`generateMetadata`), `src/app/(public)/page.tsx` (`async HomePage`), `src/app/api/public/portfolio/route.ts` (`GET`).
+  - Enhanced Dynamic Portfolio Components: `src/components/portfolio/PortfolioShell.tsx`, `src/components/portfolio/ResumeSection.tsx`.
+  - Phase 3 Integration & Component Tests: `tests/dynamic-public-portfolio.test.tsx`, `tests/setup.ts`.
 
 ---
 
 ## 7. Testing
-- **Phase 2 Verification Executed:**
-  - **Unit, Component & Data Layer Tests (`npm test`):** `2` test files passed, `19/19` tests passed:
+- **Phase 3 Verification Executed:**
+  - **Unit, Component & Integration Tests (`npm test`):** `3` test files passed, `23/23` tests passed:
     - `tests/portfolio-foundation.test.tsx` (`7/7` passed)
-    - `tests/mongodb-data-layer.test.ts` (`12/12` passed: connection caching/strict/non-strict modes, recursive `$`/`.` operator stripping, Zod validation across all V1 entities and malicious inputs, 15 Mongoose model schemas & compound indexes, idempotent `seedDatabase()` execution across repeated runs, full CRUD + draft/published filtering + project reordering, reference-safe `MediaAsset` deletion guard, `/api/public/contact` persistence, and offline fallback).
+    - `tests/mongodb-data-layer.test.ts` (`12/12` passed)
+    - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed: dynamic `generateMetadata()` from MongoDB `SiteSettings`, `GET /api/public/portfolio` snapshot & cache headers, end-to-end async `HomePage` rendering of dynamic database mutations across Profile/Resume/Achievements/Portfolio/Blog with draft exclusion and custom category filtering, and `revalidatePortfolioCache()` tag resolution).
   - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
   - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
   - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly).
@@ -104,8 +102,9 @@
 - **Phase Commit References:**
   - **Phase 0:** `fdf2ce7b5d219beebe0c498ac0ce93e6dd76f23f` (`docs: add project audit and design inventory`)
   - **Phase 1:** `f5932b592d2d749f051c8009bd59a8255624aded` (`feat: implement nextjs application foundation`)
-  - **Phase 2:** Committed at end of Phase 2 (`feat: add mongodb data layer`)
-- **Uncommitted Changes:** None after Phase 2 commit.
+  - **Phase 2:** `02c832f` (`feat: add mongodb data layer`)
+  - **Phase 3:** Committed at end of Phase 3 (`feat: implement dynamic portfolio sections`)
+- **Uncommitted Changes:** None after Phase 3 commit.
 
 ---
 
@@ -135,16 +134,16 @@
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 3 — Dynamic Public Portfolio**
+- **Next Phase:** **PHASE 4 — Cloudinary Integration**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Implement Next.js cache & tag invalidation module (`src/lib/cache/portfolio-cache.ts`) wrapping `portfolioService.getPublicPortfolioData()` with `unstable_cache`, granular cache tags (`portfolio-public`, `portfolio-profile`, `portfolio-projects`, `portfolio-resume`, `portfolio-blog`, `portfolio-settings`), and `revalidatePortfolioCache()` helper.
-  2. Connect `src/app/layout.tsx` (`generateMetadata`) and `src/app/(public)/page.tsx` to fetch dynamic portfolio data and site settings from `getCachedPublicPortfolioData()`.
-  3. Create `GET /api/public/portfolio/route.ts` to expose the public portfolio snapshot and health status.
-  4. Verify all public sections (Sidebar, Navbar, About, Services, Testimonials + Modal, Clients, Education, Experience, Skills, Achievements conditional block, Portfolio filter + grid, Blog grid, Contact map + form) render dynamically from the database/service layer, handle empty/draft states gracefully, and preserve 1:1 visual parity across desktop, tablet, and mobile.
-  5. Write and execute Phase 3 integration & component tests (`tests/dynamic-public-portfolio.test.tsx`).
-  6. Update `context.md` and commit Phase 3 (`feat: implement dynamic portfolio sections`).
+  1. Read `.agents/skills/cloudinary-media-management/SKILL.md`.
+  2. Implement server-side Cloudinary configuration, upload signature generator (SHA-1/SHA-256 parameter signing), folder conventions (`tamjid-portfolio/avatars`, `tamjid-portfolio/projects`, `tamjid-portfolio/blog`, `tamjid-portfolio/icons`, `tamjid-portfolio/certificates`, `tamjid-portfolio/clients`), MIME/extension/size validation, and responsive URL transformation helper (`f_auto,q_auto,w_...`) in `src/lib/cloudinary/cloudinary.ts`.
+  3. Implement `CloudinaryMediaService` in `src/services/media-service.ts` supporting signed upload payload creation, `MediaAsset` registration, asset listing, reference inspection (`findAssetReferences`), and reference-safe deletion (including remote Cloudinary destroy call when configured).
+  4. Implement upload/media API endpoints in `src/app/api/uploads/sign/route.ts` and `src/app/api/uploads/assets/route.ts` (with session authorization hooks ready for Phase 5).
+  5. Write and execute Phase 4 unit & integration tests (`tests/cloudinary-media.test.ts`) verifying signature generation, file type/size validation, URL transformation helpers, and reference-safe asset deletion.
+  6. Update `context.md` and commit Phase 4 (`feat: integrate cloudinary media management`).
 
 ---
 
 ## 13. User Feedback
-- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 1 to Phase 2. Completed Phase 2 and stopped at the Phase 2 gate awaiting `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 2 to Phase 3. Completed Phase 3 and stopped at the Phase 3 gate awaiting `continue with context.md`.

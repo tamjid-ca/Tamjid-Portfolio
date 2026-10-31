@@ -60,13 +60,22 @@ export function ResumeSection({
         </div>
 
         <ol className="timeline-list">
-          {visibleEducation.map((item) => (
-            <li key={item.id} className="timeline-item">
-              <h4 className="h4 timeline-item-title">{item.institution}</h4>
-              <span>{item.dateRange}</span>
-              <p className="timeline-text">{item.description}</p>
-            </li>
-          ))}
+          {visibleEducation.map((item) => {
+            const titleParts = [
+              item.institution,
+              item.degree,
+              item.department,
+            ].filter(Boolean);
+            const headingText = titleParts.join(' — ');
+
+            return (
+              <li key={item.id} className="timeline-item">
+                <h4 className="h4 timeline-item-title">{headingText}</h4>
+                <span>{item.dateRange}</span>
+                <p className="timeline-text">{item.description}</p>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
@@ -80,13 +89,22 @@ export function ResumeSection({
         </div>
 
         <ol className="timeline-list">
-          {visibleExperience.map((item) => (
-            <li key={item.id} className="timeline-item">
-              <h4 className="h4 timeline-item-title">{item.position}</h4>
-              <span>{item.dateRange}</span>
-              <p className="timeline-text">{item.description}</p>
-            </li>
-          ))}
+          {visibleExperience.map((item) => {
+            const titleParts = [
+              item.position,
+              item.company,
+              item.location,
+            ].filter(Boolean);
+            const headingText = titleParts.join(' — ');
+
+            return (
+              <li key={item.id} className="timeline-item">
+                <h4 className="h4 timeline-item-title">{headingText}</h4>
+                <span>{item.dateRange}</span>
+                <p className="timeline-text">{item.description}</p>
+              </li>
+            );
+          })}
         </ol>
       </section>
 

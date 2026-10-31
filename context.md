@@ -7,11 +7,11 @@
 - **Target Branch:** `version2`
 - **Migration Objectives:** Transform the existing static HTML/CSS/JS portfolio for **MD. Tamjid Hossain** into a production-ready, maintainable, fully dynamic, database-driven Next.js (App Router) application with MongoDB (Mongoose), Cloudinary media management, a secure Admin CMS, Dark (default) + Light themes, and subtle Three.js / WebGL motion enhancements while preserving the original website's 1:1 visual identity.
 - **Technology Stack:**
-  - **Frontend:** Next.js 15.5 (App Router), React 19, TypeScript 5.8, preserved native CSS (`src/app/globals.css` with semantic theme custom properties), Three.js / React Three Fiber / Drei, Lucide React (Admin CMS), custom inline Ionicons v5.5.2 SVG renderer (`src/components/ui/IonIcon.tsx`).
+  - **Frontend:** Next.js 15.5 (App Router), React 19, TypeScript 5.8, preserved native CSS (`src/app/globals.css` with semantic theme custom properties), Three.js (`three` + `@types/three` lazy-loaded via `next/dynamic`), custom inline Ionicons v5.5.2 SVG renderer (`src/components/ui/IonIcon.tsx`).
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose 8.x, Zod 3.24 validation, salted `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
   - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 7 Completed** (Dark default + harmonized WCAG-compliant Light theme custom properties `[data-theme="light"]` in `src/app/globals.css`, FOUC-free `ThemeProvider` & `buildThemeInitScript` in `src/components/theme/ThemeProvider.tsx`, accessible `ThemeToggle` in `src/components/theme/ThemeToggle.tsx` integrated into `Navbar` respecting `siteSettings.defaultTheme` and `siteSettings.enableThemeToggle`, and 43/43 passing tests across 7 test files). Ready to begin **Phase 8 — Three.js and Motion Enhancement**.
+- **Current Implementation Status:** **Phase 8 Completed** (Lazy-loaded Three.js WebGL ambient constellation backdrop `src/components/animations/AmbientBackgroundCanvas.tsx` and `src/components/animations/AmbientBackgroundLoader.tsx` with `next/dynamic({ ssr: false })`, `siteSettings.enableThreeD` toggle support, `prefers-reduced-motion: reduce` static fallback, WebGL error boundary & context fallback, `document.hidden` visibility pause, capped mobile `dpr` & particle counts, Dark/Light theme particle color adaptation, and 47/47 passing tests across 8 test files). Ready to begin **Phase 9 — Performance, SEO and Accessibility**.
 
 ---
 
@@ -33,11 +33,10 @@
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin/{login,dashboard,[section]}`, `src/app/api/admin/{portfolio,messages}`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/{admin,portfolio,theme,ui}`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
-- **Theme System Architecture:**
-  - `src/app/globals.css`: `:root` preserves the exact V1 Dark theme tokens; `[data-theme="light"]` overrides semantic tokens (`--smoky-black`, `--eerie-black-2`, `--eerie-black-1`, `--onyx`, `--jet`, `--white-1`, `--white-2`, `--light-gray`, `--light-gray-70`, `--orange-yellow-crayola`, `--vegas-gold`, gradients, shadows, navbar glass surface, and map filter) for a warm alabaster & gold Light mode.
-  - `src/components/theme/ThemeProvider.tsx`: Provides `ThemeProvider`, `useTheme()`, and `buildThemeInitScript()` (injected in `src/app/layout.tsx` `<head>`) to prevent FOUC and synchronize `data-theme` + `localStorage` with `siteSettings.defaultTheme` and `siteSettings.enableThemeToggle`.
-  - `src/components/theme/ThemeToggle.tsx`: Accessible toggle button (`sunny-outline` / `moon-outline`) integrated into `src/components/portfolio/Navbar.tsx`.
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin/{login,dashboard,[section]}`, `src/app/api/admin/{portfolio,messages}`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/{admin,animations,portfolio,theme,ui}`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
+- **Three.js Ambient Animation Layer Architecture:**
+  - `src/components/animations/AmbientBackgroundCanvas.tsx`: Client-only Three.js `WebGLRenderer` (`powerPreference: 'low-power'`, `alpha: true`, `dpr <= 1.5`) + `BufferGeometry` + `PointsMaterial` rendering a subtle golden constellation backdrop (`z-index: 0`, `pointer-events: none`, `position: fixed; inset: 0`) that pauses when `document.hidden` is true, adapts particle color to `dark`/`light` theme, and disposes GPU buffers/materials/renderer on unmount.
+  - `src/components/animations/AmbientBackgroundLoader.tsx`: Wraps `AmbientBackgroundCanvas` with `next/dynamic(..., { ssr: false })`, `WebGLErrorBoundary`, `prefers-reduced-motion: reduce` detection, and `siteSettings.enableThreeD` gating.
 
 ---
 
@@ -50,12 +49,13 @@
 - **Decision 6 — Zero-Dependency Native Crypto Cloudinary Signing & URL Transform:** Used Node's built-in `crypto` module for Cloudinary SHA-256/SHA-1 parameter signing and pure string URL transformation (`src/lib/cloudinary/url.ts`).
 - **Decision 7 — Dual-Layer Admin Session Security (Signed Cookie + Server-Revocable DB Session):** Combined HMAC-SHA256 signed `HttpOnly` cookies (for fast Edge Middleware checks) with server-backed `AdminSession` records in MongoDB verified by `adminAuthService.requireAdminSession()` on every API route and mutation.
 - **Decision 8 — Strict CSS & Bundle Isolation for `/admin`:** Placed all Admin CMS styling inside `src/app/admin/admin.css` scoped under `.admin-cms-root` and `.admin-*` class names so the public portfolio stylesheet (`src/app/globals.css`) and public bundle remain completely untouched.
-- **Decision 9 — Zero-Dependency Custom Property Theme System with Inline FOUC Script:** Implemented Dark/Light theming via `[data-theme]` CSS custom property overrides in `src/app/globals.css` paired with `buildThemeInitScript()` in `src/app/layout.tsx`, avoiding third-party theme wrapper hydration mismatches while respecting Admin CMS `defaultTheme` and `enableThemeToggle` controls.
+- **Decision 9 — Zero-Dependency Custom Property Theme System with Inline FOUC Script:** Implemented Dark/Light theming via `[data-theme]` CSS custom property overrides in `src/app/globals.css` paired with `buildThemeInitScript()` in `src/app/layout.tsx`.
+- **Decision 10 — Direct Three.js WebGL Scene Lazy-Loaded via `next/dynamic` (`ssr: false`):** Used `three` directly with `next/dynamic` (`ssr: false`) rather than bundling heavy R3F reconcilers into the React 19 tree, keeping initial First Load JS at `110 kB` while providing full GPU lifecycle control and zero layout shift (`CLS = 0`).
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 7 Completed (Stopped at Phase 7 gate awaiting `continue with context.md` for Phase 8)
+- **Current Phase:** Phase 8 Completed (Stopped at Phase 8 gate awaiting `continue with context.md` for Phase 9)
 - **Completed Phases:**
   - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
   - [x] **Phase 1:** Next.js Foundation (`f5932b5`)
@@ -64,10 +64,10 @@
   - [x] **Phase 4:** Cloudinary Integration (`5aa4db5`)
   - [x] **Phase 5:** Admin Authentication and Authorization (`b5d8944`)
   - [x] **Phase 6:** Complete Admin CMS (`bf89572`)
-  - [x] **Phase 7:** Dark/Light Theme
+  - [x] **Phase 7:** Dark/Light Theme (`2250811`)
+  - [x] **Phase 8:** Three.js and Motion Enhancement
 - **Pending Phases:**
-  - [ ] **Phase 8:** Three.js and Motion Enhancement (Lazy-loaded 3D ambient scene + reduced-motion fallback)
-  - [ ] **Phase 9:** Performance, SEO and Accessibility (Metadata, sitemap, robots, CWV, WCAG audit)
+  - [ ] **Phase 9:** Performance, SEO and Accessibility (Metadata, sitemap, robots, JSON-LD structured data, caching strategy doc, CWV & WCAG audit)
   - [ ] **Phase 10:** Comprehensive QA and Security Audit (Full test suite + QA/Security/Performance/Deployment docs)
   - [ ] **Phase 11:** Production Readiness (Final verification & production readiness report)
 - **Blocked Tasks:** None.
@@ -82,24 +82,25 @@
 - **Phase 4 Deliverables:** `src/lib/cloudinary/{cloudinary,url,index}.ts`, `src/services/media-service.ts`, `src/app/api/uploads/{sign,assets}/route.ts`, `tests/cloudinary-media.test.ts`.
 - **Phase 5 Deliverables:** `src/models/{AdminUser,AdminSession}.ts`, `src/lib/auth/{password,rate-limiter,request-guard}.ts`, `src/lib/security/csrf.ts`, `src/services/auth-service.ts`, `src/app/api/auth/{login,logout,session}/route.ts`, `src/middleware.ts`, `tests/admin-auth.test.ts`.
 - **Phase 6 Deliverables:** `src/app/api/admin/{portfolio,messages}/route.ts`, `src/app/admin/{layout,admin.css}`, `src/app/admin/login/page.tsx`, `src/app/admin/dashboard/page.tsx`, `src/app/admin/[section]/page.tsx`, `src/components/admin/{AdminLoginForm,AdminDashboardClient}.tsx`, `tests/admin-cms.test.tsx`.
-- **Phase 7 Deliverables:**
-  - Light Theme CSS Tokens: `[data-theme="light"]` and `.theme-toggle-btn` in `src/app/globals.css`.
-  - Theme Provider, Script & Toggle: `src/components/theme/theme-script.ts`, `src/components/theme/ThemeProvider.tsx`, `src/components/theme/ThemeToggle.tsx`.
-  - Shell & Layout Integration: `src/app/layout.tsx`, `src/components/portfolio/PortfolioShell.tsx`, `src/components/portfolio/Navbar.tsx`, `src/components/ui/IonIcon.tsx` (`sunny-outline`, `moon-outline`).
-  - Phase 7 Tests: `tests/theme-system.test.tsx`.
+- **Phase 7 Deliverables:** `src/app/globals.css` (`[data-theme="light"]`), `src/components/theme/{theme-script,ThemeProvider,ThemeToggle}.tsx`, `tests/theme-system.test.tsx`.
+- **Phase 8 Deliverables:**
+  - Three.js Ambient Components: `src/components/animations/AmbientBackgroundCanvas.tsx`, `src/components/animations/AmbientBackgroundLoader.tsx`.
+  - Backdrop Styles & Shell Integration: `.ambient-bg-canvas` / `.ambient-bg-fallback` in `src/app/globals.css`, `<AmbientBackgroundLoader />` in `src/components/portfolio/PortfolioShell.tsx`.
+  - Phase 8 Tests: `tests/threejs-ambient.test.tsx`.
 
 ---
 
 ## 7. Testing
-- **Phase 7 Verification Executed:**
-  - **Unit, Component & Integration Tests (`npm test`):** `7` test files passed, `43/43` tests passed:
+- **Phase 8 Verification Executed:**
+  - **Unit, Component & Integration Tests (`npm test`):** `8` test files passed, `47/47` tests passed:
     - `tests/portfolio-foundation.test.tsx` (`7/7` passed)
     - `tests/mongodb-data-layer.test.ts` (`12/12` passed)
     - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed)
     - `tests/cloudinary-media.test.ts` (`5/5` passed)
     - `tests/admin-auth.test.ts` (`5/5` passed)
     - `tests/admin-cms.test.tsx` (`5/5` passed)
-    - `tests/theme-system.test.tsx` (`5/5` passed: Dark default initialization, Dark/Light toggling + `localStorage` persistence, restoring saved preference on mount, hiding toggle & locking `defaultTheme` when `enableThemeToggle` is `false`, and FOUC-prevention script execution).
+    - `tests/theme-system.test.tsx` (`5/5` passed)
+    - `tests/threejs-ambient.test.tsx` (`4/4` passed: `enableThreeD: false` suppression, `prefers-reduced-motion: reduce` static fallback, missing WebGL context fallback, and `PortfolioShell` layout preservation).
   - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
   - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
   - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly).
@@ -117,8 +118,9 @@
   - **Phase 4:** `5aa4db5` (`feat: integrate cloudinary media management`)
   - **Phase 5:** `b5d8944` (`feat: add secure admin authentication`)
   - **Phase 6:** `bf89572` (`feat: implement admin cms`)
-  - **Phase 7:** Committed at end of Phase 7 (`feat: add dark and light themes`)
-- **Uncommitted Changes:** None after Phase 7 commit.
+  - **Phase 7:** `2250811` (`feat: add dark and light themes`)
+  - **Phase 8:** Committed at end of Phase 8 (`feat: integrate optimized threejs animations`)
+- **Uncommitted Changes:** None after Phase 8 commit.
 
 ---
 
@@ -148,19 +150,18 @@
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 8 — Three.js and Motion Enhancement**
+- **Next Phase:** **PHASE 9 — Performance, SEO and Accessibility**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Read `.agents/skills/threejs-performance/SKILL.md` and implement a subtle, non-intrusive, lazy-loaded 3D/WebGL ambient background canvas (`src/components/animations/AmbientBackgroundCanvas.tsx` and `src/components/animations/AmbientBackgroundLoader.tsx` using `next/dynamic` with `ssr: false`) positioned behind `.sidebar` and `.main-content` (`position: fixed; inset: 0; pointer-events: none; z-index: 0`) so it causes zero layout shift (`CLS = 0`) and never alters card or text readability.
-  2. Enforce strict performance & accessibility guards:
-     - Respect `siteSettings.enableThreeD` (do not mount when disabled in Admin CMS).
-     - Respect `prefers-reduced-motion: reduce` (render static fallback when user prefers reduced motion).
-     - Pause animation loop when `document.hidden` (`visibilitychange` event).
-     - Gracefully fall back if WebGL context creation is unavailable, and clean up geometries/materials/animation frames on unmount.
-  3. Adapt ambient particle colors to the active theme (`dark` vs `light`).
-  4. Write and execute Phase 8 unit/component tests (`tests/threejs-ambient.test.tsx`).
-  5. Update `context.md` and commit Phase 8 (`feat: integrate optimized threejs animations`).
+  1. Read `.agents/skills/portfolio-performance-audit/SKILL.md` and create `docs/CACHING_STRATEGY.md` documenting ISR/tag-based caching (`unstable_cache`, `PORTFOLIO_CACHE_TAGS`, `revalidatePortfolioCache()`), Admin bypass (`force-dynamic` + `no-store`), and Cloudinary CDN delivery.
+  2. Implement dynamic SEO routes and structured data:
+     - `src/app/sitemap.ts` generating canonical sitemap entries for the public portfolio.
+     - `src/app/robots.ts` allowing `/` and disallowing `/admin` and `/api`.
+     - `src/lib/seo/structured-data.ts` generating Schema.org `Person` and `WebSite` JSON-LD injected into `src/app/(public)/page.tsx` and enriched canonical/Twitter/OpenGraph metadata in `src/app/layout.tsx`.
+  3. Audit and enhance WCAG accessibility (skip-to-content link, semantic landmarks, focus-visible outlines, ARIA attributes on tabs/modals/filters) without altering original visual layout proportions.
+  4. Write and execute Phase 9 unit/integration tests (`tests/performance-seo-a11y.test.tsx`).
+  5. Update `context.md` and commit Phase 9 (`perf: optimize rendering and caching`).
 
 ---
 
 ## 13. User Feedback
-- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 6 to Phase 7. Completed Phase 7 and stopped at the Phase 7 gate awaiting `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 7 to Phase 8. Completed Phase 8 and stopped at the Phase 8 gate awaiting `continue with context.md`.

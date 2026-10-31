@@ -9,6 +9,7 @@ import { ResumeSection } from '@/components/portfolio/ResumeSection';
 import { PortfolioSection } from '@/components/portfolio/PortfolioSection';
 import { BlogSection } from '@/components/portfolio/BlogSection';
 import { ContactSection } from '@/components/portfolio/ContactSection';
+import { AmbientBackgroundLoader } from '@/components/animations/AmbientBackgroundLoader';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 interface PortfolioShellProps {
@@ -45,6 +46,7 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
       defaultTheme={data.siteSettings.defaultTheme}
       enableThemeToggle={data.siteSettings.enableThemeToggle}
     >
+      <AmbientBackgroundLoader enabled={data.siteSettings.enableThreeD} />
       <main>
         <Sidebar profile={data.profile} socialLinks={data.socialLinks} />
 

@@ -1,25 +1,32 @@
 import { NextResponse } from 'next/server';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { ZodError } from 'zod';
+import { contactService } from '@/services/contact-service';
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as Record<string, unknown>;
-    const fullname =
-      typeof body.fullname === 'string' ? body.fullname.trim() : '';
-    const email = typeof body.email === 'string' ? body.email.trim() : '';
-    const message =
-      typeof body.message === 'string' ? body.message.trim() : '';
+    const body: unknown = await request.json();
+    const result = await contactService.submitContactMessage(body);
 
-    if (!fullname || !EMAIL_PATTERN.test(email) || !message) {
+    return NextResponse.json(
+      {
+        ok: true,
+        persisted: result.persisted,
+        id: result.message.id,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    if (error instanceof ZodError) {
       return NextResponse.json(
-        { ok: false, error: 'Invalid contact form submission.' },
+        {
+          ok: false,
+          error:
+            error.issues[0]?.message ?? 'Invalid contact form submission.',
+        },
         { status: 400 }
       );
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 });
-  } catch {
     return NextResponse.json(
       { ok: false, error: 'Malformed request payload.' },
       { status: 400 }

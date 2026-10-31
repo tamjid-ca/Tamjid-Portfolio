@@ -212,6 +212,31 @@ export interface BlogPostDTO {
   status: PublicationStatus;
 }
 
+export interface ContactMessageDTO {
+  id: string;
+  fullname: string;
+  email: string;
+  message: string;
+  isRead: boolean;
+  ipHash?: string;
+  createdAt: string;
+}
+
+export interface MediaAssetDTO {
+  id: string;
+  publicId: string;
+  url: string;
+  secureUrl: string;
+  folder: string;
+  resourceType: 'image' | 'video' | 'raw';
+  format: string;
+  width?: number;
+  height?: number;
+  bytes: number;
+  altText: string;
+  createdAt: string;
+}
+
 export interface PortfolioDataDTO {
   siteSettings: SiteSettingsDTO;
   profile: ProfileDTO;

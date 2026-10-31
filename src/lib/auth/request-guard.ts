@@ -1,6 +1,8 @@
 import crypto from 'crypto';
+import { verifyCsrfOrigin } from '@/lib/security/csrf';
 
 export const ADMIN_SESSION_COOKIE_NAME = 'tamjid_admin_session';
+export const ADMIN_SESSION_TTL_SECONDS = 24 * 60 * 60; // 24 hours
 
 export class UnauthorizedAdminError extends Error {
   constructor(message = 'Unauthorized admin request.') {
@@ -24,6 +26,10 @@ function getSigningSecret(): string {
     );
   }
   return secret;
+}
+
+export function hashSessionToken(rawToken: string): string {
+  return crypto.createHash('sha256').update(rawToken).digest('hex');
 }
 
 export function createSignedSessionCookieValue(
@@ -122,9 +128,25 @@ export function verifyAdminRequest(
   request: Request,
   secretOverride?: string
 ): SignedAdminTokenPayload {
+  verifyCsrfOrigin(request);
   const token = extractSessionTokenFromRequest(request);
   if (!token) {
     throw new UnauthorizedAdminError('Missing admin session credentials.');
   }
   return verifySignedSessionCookieValue(token, secretOverride);
+}
+
+export function formatAdminSessionSetCookie(
+  cookieValue: string,
+  maxAgeSeconds = ADMIN_SESSION_TTL_SECONDS
+): string {
+  const secureAttr = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `${ADMIN_SESSION_COOKIE_NAME}=${encodeURIComponent(
+    cookieValue
+  )}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secureAttr}`;
+}
+
+export function formatClearedAdminSessionSetCookie(): string {
+  const secureAttr = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `${ADMIN_SESSION_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureAttr}`;
 }

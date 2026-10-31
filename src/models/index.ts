@@ -22,3 +22,6 @@ export {
   type ContactMessageDocument,
 } from './ContactMessage';
 export { MediaAssetModel, type MediaAssetDocument } from './MediaAsset';
+export { AdminUserModel, type AdminUserDocument } from './AdminUser';
+export { AdminSessionModel, type AdminSessionDocument } from './AdminSession';
+

@@ -14,6 +14,7 @@ import {
   socialLinkRepository,
   testimonialRepository,
 } from '@/repositories';
+import { adminAuthService } from '@/services/auth-service';
 import { V1_PORTFOLIO_SEED_DATA } from './v1-portfolio-data';
 
 export interface SeedResultSummary {
@@ -103,6 +104,8 @@ export async function seedDatabase(options?: {
       slug: item.slug,
     });
   }
+
+  await adminAuthService.ensureInitialAdminUser();
 
   return {
     siteSettingsSeeded: true,

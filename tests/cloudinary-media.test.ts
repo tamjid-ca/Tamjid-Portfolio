@@ -21,6 +21,8 @@ import {
 import { disconnectFromDatabase } from '@/lib/mongodb/connection';
 import {
   AchievementModel,
+  AdminSessionModel,
+  AdminUserModel,
   BlogPostModel,
   ClientLogoModel,
   ContactMessageModel,
@@ -259,6 +261,8 @@ describe('Phase 4 — Cloudinary Media Management', () => {
     attachInMemoryStoreToModel(BlogPostModel);
     attachInMemoryStoreToModel(ContactMessageModel);
     attachInMemoryStoreToModel(MediaAssetModel);
+    attachInMemoryStoreToModel(AdminUserModel);
+    attachInMemoryStoreToModel(AdminSessionModel);
   });
 
   afterEach(async () => {

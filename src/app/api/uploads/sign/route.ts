@@ -1,20 +1,19 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import {
-  UnauthorizedAdminError,
-  verifyAdminRequest,
-} from '@/lib/auth/request-guard';
+import { UnauthorizedAdminError } from '@/lib/auth/request-guard';
 import {
   CloudinaryConfigurationError,
   MediaValidationError,
 } from '@/lib/cloudinary/cloudinary';
+import { CsrfValidationError } from '@/lib/security/csrf';
+import { adminAuthService } from '@/services/auth-service';
 import { cloudinaryMediaService } from '@/services/media-service';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    verifyAdminRequest(request);
+    await adminAuthService.requireAdminSession(request);
     const body: unknown = await request.json();
     const signedPayload = cloudinaryMediaService.createUploadSignature(body);
 
@@ -33,6 +32,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { ok: false, error: error.message },
         { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    if (error instanceof CsrfValidationError) {
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import {
-  UnauthorizedAdminError,
-  verifyAdminRequest,
-} from '@/lib/auth/request-guard';
+import { UnauthorizedAdminError } from '@/lib/auth/request-guard';
 import { MediaValidationError } from '@/lib/cloudinary/cloudinary';
+import { CsrfValidationError } from '@/lib/security/csrf';
+import { adminAuthService } from '@/services/auth-service';
 import { cloudinaryMediaService } from '@/services/media-service';
 import { MediaAssetInUseError } from '@/services/portfolio-service';
 
@@ -12,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
-    verifyAdminRequest(request);
+    await adminAuthService.requireAdminSession(request);
     const { searchParams } = new URL(request.url);
     const folder = searchParams.get('folder')?.trim() || undefined;
     const assets = await cloudinaryMediaService.listAssets({ folder });
@@ -38,7 +37,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    verifyAdminRequest(request);
+    await adminAuthService.requireAdminSession(request);
     const body: unknown = await request.json();
     const asset = await cloudinaryMediaService.registerAsset(body);
 
@@ -51,6 +50,13 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { ok: false, error: error.message },
         { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    if (error instanceof CsrfValidationError) {
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 
@@ -80,7 +86,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    verifyAdminRequest(request);
+    await adminAuthService.requireAdminSession(request);
     const body = (await request.json()) as { publicId?: unknown };
     const publicId =
       typeof body?.publicId === 'string' ? body.publicId.trim() : '';
@@ -106,6 +112,13 @@ export async function DELETE(request: Request) {
       return NextResponse.json(
         { ok: false, error: error.message },
         { status: 401, headers: { 'Cache-Control': 'no-store' } }
+      );
+    }
+
+    if (error instanceof CsrfValidationError) {
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: 403, headers: { 'Cache-Control': 'no-store' } }
       );
     }
 

@@ -11,7 +11,7 @@
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose 8.x, Zod 3.24 validation, salted `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
   - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 5 Completed** (`AdminUser` & `AdminSession` Mongoose models, salted `crypto.scrypt` password hashing with constant-time verification, IP & account brute-force lockout rate limiting, CSRF origin verification, `adminAuthService` with server-revocable sessions, `/api/auth/login`, `/api/auth/logout`, `/api/auth/session` endpoints, Next.js `src/middleware.ts` route protection & security headers, and 33/33 passing tests). Ready to begin **Phase 6 — Complete Admin CMS**.
+- **Current Implementation Status:** **Phase 6 Completed** (Protected `/api/admin/portfolio` and `/api/admin/messages` endpoints, isolated Admin CMS styling in `src/app/admin/admin.css`, `/admin/login` authentication UI, `/admin/dashboard` and `/admin/[section]` full CMS workspace managing all 13 portfolio content domains + Cloudinary media library + Contact messages inbox + one-click V1 seed sync + automatic public cache revalidation, and 38/38 passing tests across 6 test files). Ready to begin **Phase 7 — Dark/Light Theme**.
 
 ---
 
@@ -33,14 +33,12 @@
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/portfolio`, `src/components/ui`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
-- **Authentication & Security Layer Architecture:**
-  - `src/models/AdminUser.ts` & `src/models/AdminSession.ts`: Stores admin credentials (`passwordHash`, `failedLoginAttempts`, `lockedUntil`, `lastLoginAt`) and server-revocable sessions (`sessionId`, `tokenHash`, `expiresAt` with TTL index, `revokedAt`).
-  - `src/lib/auth/password.ts`: Salted `crypto.scrypt` hashing (`hashPassword`) and constant-time comparison (`verifyPassword`).
-  - `src/lib/auth/rate-limiter.ts`: Sliding-window brute-force rate limiter (`MAX_LOGIN_ATTEMPTS = 5`, `15m` lockout).
-  - `src/lib/security/csrf.ts`: Same-origin CSRF verification (`verifyCsrfOrigin`) and `ADMIN_SECURITY_HEADERS`.
-  - `src/services/auth-service.ts`: `adminAuthService` (`ensureInitialAdminUser`, `login`, `logout`, `requireAdminSession`).
-  - `src/middleware.ts`: Edge protection for `/admin/*` and `/api/admin/*` plus `noindex, nofollow` and `X-Frame-Options: DENY` headers.
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin/{login,dashboard,[section]}`, `src/app/api/admin/{portfolio,messages}`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/admin`, `src/components/portfolio`, `src/components/ui`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
+- **Admin CMS Layer Architecture:**
+  - `src/app/admin/layout.tsx` & `src/app/admin/admin.css`: Scoped `.admin-cms-root` layout with `robots: { index: false, follow: false }` completely isolated from public portfolio CSS.
+  - `src/app/api/admin/portfolio/route.ts`: Authenticated `GET` (snapshot), `POST` (`action: 'seed'` or collection item creation), `PUT` (`siteSettings`, `profile`, or collection item update), `PATCH` (`action: 'reorder'`), and `DELETE` (collection item deletion) with Zod validation and automatic `revalidatePortfolioCache()`.
+  - `src/app/api/admin/messages/route.ts`: Authenticated `GET`, `PATCH` (`isRead` toggle), and `DELETE` for contact form submissions.
+  - `src/components/admin/AdminLoginForm.tsx` & `src/components/admin/AdminDashboardClient.tsx`: Full interactive CMS interface covering Overview stats, Profile & Headings, Projects, Resume & Skills (Education, Experience, Skills, Achievements), Services & Testimonials (+ Client Logos), Blog Posts, Navigation & Social Links, Cloudinary Media Library (signed upload + reference-checked deletion), Contact Inbox, and Site & Appearance Settings.
 
 ---
 
@@ -51,22 +49,23 @@
 - **Decision 4 — Deterministic Seed Keys & Natural Slugs for Idempotent Seeding:** Added `singletonKey: 'default'` on `SiteSettings`/`Profile` and `seedKey` (plus `slug` on `NavigationItem`, `Project`, `BlogPost`) so `seedDatabase()` can run repeatedly without creating duplicate documents.
 - **Decision 5 — Decoupled Cache Tag Revalidation (`src/lib/cache/revalidate.ts`):** Separated tag constants and `revalidatePortfolioCache()` into `src/lib/cache/revalidate.ts` to avoid circular imports.
 - **Decision 6 — Zero-Dependency Native Crypto Cloudinary Signing & URL Transform:** Used Node's built-in `crypto` module for Cloudinary SHA-256/SHA-1 parameter signing and pure string URL transformation (`src/lib/cloudinary/url.ts`).
-- **Decision 7 — Dual-Layer Admin Session Security (Signed Cookie + Server-Revocable DB Session):** Combined HMAC-SHA256 signed `HttpOnly` cookies (for fast Edge Middleware checks) with server-backed `AdminSession` records in MongoDB verified by `adminAuthService.requireAdminSession()` on every API route and mutation, enabling instant server-side session revocation upon logout.
+- **Decision 7 — Dual-Layer Admin Session Security (Signed Cookie + Server-Revocable DB Session):** Combined HMAC-SHA256 signed `HttpOnly` cookies (for fast Edge Middleware checks) with server-backed `AdminSession` records in MongoDB verified by `adminAuthService.requireAdminSession()` on every API route and mutation.
+- **Decision 8 — Strict CSS & Bundle Isolation for `/admin`:** Placed all Admin CMS styling inside `src/app/admin/admin.css` scoped under `.admin-cms-root` and `.admin-*` class names so the public portfolio stylesheet (`src/app/globals.css`) and public bundle remain completely untouched.
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 5 Completed (Stopped at Phase 5 gate awaiting `continue with context.md` for Phase 6)
+- **Current Phase:** Phase 6 Completed (Stopped at Phase 6 gate awaiting `continue with context.md` for Phase 7)
 - **Completed Phases:**
   - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
   - [x] **Phase 1:** Next.js Foundation (`f5932b5`)
   - [x] **Phase 2:** MongoDB and Backend Foundation (`02c832f`)
   - [x] **Phase 3:** Dynamic Public Portfolio (`5b0eee6`)
   - [x] **Phase 4:** Cloudinary Integration (`5aa4db5`)
-  - [x] **Phase 5:** Admin Authentication and Authorization
+  - [x] **Phase 5:** Admin Authentication and Authorization (`b5d8944`)
+  - [x] **Phase 6:** Complete Admin CMS
 - **Pending Phases:**
-  - [ ] **Phase 6:** Complete Admin CMS (Protected `/api/admin/*` CRUD endpoints + `/admin/login` and `/admin/dashboard` full content management UI for all portfolio sections, media library, contact messages inbox, ordering, draft/publish, and cache revalidation)
-  - [ ] **Phase 7:** Dark/Light Theme (Dark default + harmonized Light mode tokens + persistence)
+  - [ ] **Phase 7:** Dark/Light Theme (Dark default + harmonized Light mode tokens + persistence + optional toggle in portfolio shell)
   - [ ] **Phase 8:** Three.js and Motion Enhancement (Lazy-loaded 3D ambient scene + reduced-motion fallback)
   - [ ] **Phase 9:** Performance, SEO and Accessibility (Metadata, sitemap, robots, CWV, WCAG audit)
   - [ ] **Phase 10:** Comprehensive QA and Security Audit (Full test suite + QA/Security/Performance/Deployment docs)
@@ -81,24 +80,25 @@
 - **Phase 2 Deliverables:** `src/lib/mongodb/connection.ts`, `src/lib/security/sanitize.ts`, `src/lib/validation/portfolio-schemas.ts`, `src/models/*` (15 models), `src/repositories/*`, `src/services/*`, `src/seed/{seed-database,cli}.ts`, `tests/mongodb-data-layer.test.ts`.
 - **Phase 3 Deliverables:** `src/lib/cache/{revalidate,portfolio-cache}.ts`, `src/app/layout.tsx`, `src/app/(public)/page.tsx`, `src/app/api/public/portfolio/route.ts`, `tests/dynamic-public-portfolio.test.tsx`.
 - **Phase 4 Deliverables:** `src/lib/cloudinary/{cloudinary,url,index}.ts`, `src/services/media-service.ts`, `src/app/api/uploads/{sign,assets}/route.ts`, `tests/cloudinary-media.test.ts`.
-- **Phase 5 Deliverables:**
-  - Admin Models: `src/models/AdminUser.ts`, `src/models/AdminSession.ts`, `src/models/index.ts`.
-  - Auth & Security Primitives: `src/lib/auth/password.ts`, `src/lib/auth/rate-limiter.ts`, `src/lib/auth/request-guard.ts`, `src/lib/security/csrf.ts`.
-  - Auth Service: `src/services/auth-service.ts` (`adminAuthService`).
-  - Auth API Routes: `src/app/api/auth/login/route.ts`, `src/app/api/auth/logout/route.ts`, `src/app/api/auth/session/route.ts`.
-  - Edge Middleware: `src/middleware.ts`.
-  - Phase 5 Tests: `tests/admin-auth.test.ts`.
+- **Phase 5 Deliverables:** `src/models/{AdminUser,AdminSession}.ts`, `src/lib/auth/{password,rate-limiter,request-guard}.ts`, `src/lib/security/csrf.ts`, `src/services/auth-service.ts`, `src/app/api/auth/{login,logout,session}/route.ts`, `src/middleware.ts`, `tests/admin-auth.test.ts`.
+- **Phase 6 Deliverables:**
+  - Extended Services: `src/services/portfolio-service.ts` (`deleteNavigationItem`, `reorderCollection`, resilient `getAdminPortfolioData`), `src/services/contact-service.ts` (`listMessages`, `markMessageReadState`, `deleteMessage`).
+  - Protected Admin API Routes: `src/app/api/admin/portfolio/route.ts`, `src/app/api/admin/messages/route.ts`.
+  - Isolated Admin Layout & Styles: `src/app/admin/layout.tsx`, `src/app/admin/admin.css`.
+  - Admin CMS Pages & Client Components: `src/app/admin/login/page.tsx`, `src/components/admin/AdminLoginForm.tsx`, `src/app/admin/dashboard/page.tsx`, `src/app/admin/[section]/page.tsx`, `src/components/admin/AdminDashboardClient.tsx`.
+  - Phase 6 Tests: `tests/admin-cms.test.tsx`.
 
 ---
 
 ## 7. Testing
-- **Phase 5 Verification Executed:**
-  - **Unit, Component & Integration Tests (`npm test`):** `5` test files passed, `33/33` tests passed:
+- **Phase 6 Verification Executed:**
+  - **Unit, Component & Integration Tests (`npm test`):** `6` test files passed, `38/38` tests passed:
     - `tests/portfolio-foundation.test.tsx` (`7/7` passed)
     - `tests/mongodb-data-layer.test.ts` (`12/12` passed)
     - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed)
     - `tests/cloudinary-media.test.ts` (`5/5` passed)
-    - `tests/admin-auth.test.ts` (`5/5` passed: salted `scrypt` password hashing & constant-time verification, login + `HttpOnly` cookie + session validation + DB session revocation on logout, 5-attempt brute-force rate limiting & `429` lockout, `403` CSRF cross-origin protection, and Next.js `middleware.ts` route protection & security headers).
+    - `tests/admin-auth.test.ts` (`5/5` passed)
+    - `tests/admin-cms.test.tsx` (`5/5` passed: 401 rejection on unauthenticated `/api/admin/portfolio` and `/api/admin/messages`, authenticated snapshot/profile/CRUD/reorder/delete operations, contact inbox listing/read-toggle/delete operations, `<AdminLoginForm />` submission, and `<AdminDashboardClient />` multi-section navigation & rendering).
   - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
   - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
   - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly).
@@ -114,8 +114,9 @@
   - **Phase 2:** `02c832f` (`feat: add mongodb data layer`)
   - **Phase 3:** `5b0eee6` (`feat: implement dynamic portfolio sections`)
   - **Phase 4:** `5aa4db5` (`feat: integrate cloudinary media management`)
-  - **Phase 5:** Committed at end of Phase 5 (`feat: add secure admin authentication`)
-- **Uncommitted Changes:** None after Phase 5 commit.
+  - **Phase 5:** `b5d8944` (`feat: add secure admin authentication`)
+  - **Phase 6:** Committed at end of Phase 6 (`feat: implement admin cms`)
+- **Uncommitted Changes:** None after Phase 6 commit.
 
 ---
 
@@ -145,18 +146,15 @@
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 6 — Complete Admin CMS**
+- **Next Phase:** **PHASE 7 — Dark/Light Theme**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Implement protected Admin CMS API routes (`/api/admin/portfolio/route.ts` and `/api/admin/messages/route.ts`) enforcing `adminAuthService.requireAdminSession(request)` on every `GET`, `POST`, `PUT`, `PATCH`, and `DELETE`, supporting full CRUD, reordering, draft/publish toggling, initial seed trigger, and contact message read/delete operations across all portfolio collections.
-  2. Implement the Admin Login page (`src/app/admin/login/page.tsx`) and isolated Admin CMS styling (`src/app/admin/admin.css`) completely separated from public portfolio styles.
-  3. Implement the complete Admin Dashboard & Content Management workspace (`src/app/admin/dashboard/page.tsx` and `src/components/admin/AdminDashboardClient.tsx`, plus section route aliases under `src/app/admin/[section]/page.tsx`) providing:
-     - Overview stats (counts of projects, services, skills, testimonials, blog posts, unread messages, media assets, and one-click V1 seed sync).
-     - Full editors for `Profile`, `SiteSettings`, `SocialLinks`, `NavigationItems`, `Services`, `Testimonials`, `Clients`, `Education`, `Experience`, `Skills`, `Achievements`, `Projects` (with category, featured, draft/published, and reordering controls), `BlogPosts`, `MediaAssets` (Cloudinary signed upload + reference-checked deletion), and `ContactMessages` inbox.
-     - Confirmation dialogs before any destructive deletion and toast feedback on save.
-  4. Write and execute Phase 6 integration & UI tests (`tests/admin-cms.test.tsx`).
-  5. Update `context.md` and commit Phase 6 (`feat: implement admin cms`).
+  1. Define harmonized Light theme CSS custom property overrides (`[data-theme="light"]`) in `src/app/globals.css` while keeping Dark mode (`[data-theme="dark"]` / `:root`) 100% identical to the original Tamjid Portfolio palette (`--smoky-black`, `--eerie-black-2`, `--onyx`, `--orange-yellow-crayola`, `--border-gradient-onyx`, `--shadow-1..5`).
+  2. Implement a Flash-of-Unstyled-Content-free (`FOUC`-free) ThemeProvider (`src/components/theme/ThemeProvider.tsx`) and subtle, accessible ThemeToggle control (`src/components/theme/ThemeToggle.tsx`) integrated into the portfolio shell without shifting or breaking the original 5-breakpoint layout geometry, respecting `siteSettings.defaultTheme` and `siteSettings.enableThemeToggle`.
+  3. Add new Ionicons (`sunny-outline`, `moon-outline`) to `src/components/ui/IonIcon.tsx` for the theme toggle button.
+  4. Write and execute Phase 7 unit/component tests (`tests/theme-system.test.tsx`).
+  5. Update `context.md` and commit Phase 7 (`feat: add dark and light themes`).
 
 ---
 
 ## 13. User Feedback
-- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 4 to Phase 5. Completed Phase 5 and stopped at the Phase 5 gate awaiting `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 5 to Phase 6. Completed Phase 6 and stopped at the Phase 6 gate awaiting `continue with context.md`.

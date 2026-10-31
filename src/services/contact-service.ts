@@ -47,4 +47,25 @@ export const contactService = {
       },
     };
   },
+
+  async listMessages(): Promise<ContactMessageDTO[]> {
+    const conn = await connectToDatabase({ strict: false });
+    if (!conn) {
+      return [];
+    }
+    return contactMessageRepository.findAll();
+  },
+
+  async markMessageReadState(
+    id: string,
+    isRead: boolean
+  ): Promise<ContactMessageDTO | null> {
+    await connectToDatabase({ strict: false });
+    return contactMessageRepository.markReadState(id, Boolean(isRead));
+  },
+
+  async deleteMessage(id: string): Promise<boolean> {
+    await connectToDatabase({ strict: false });
+    return contactMessageRepository.deleteById(id);
+  },
 };

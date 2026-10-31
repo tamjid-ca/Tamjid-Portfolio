@@ -176,7 +176,10 @@ export const portfolioService = {
   },
 
   async getAdminPortfolioData(): Promise<PortfolioDataDTO> {
-    await connectToDatabase({ strict: true });
+    const conn = await connectToDatabase({ strict: false });
+    if (!conn) {
+      return cloneSeedPortfolioData();
+    }
 
     const [
       siteSettings,
@@ -288,6 +291,14 @@ export const portfolioService = {
     const updated = await navigationItemRepository.updateById(id, validated);
     revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.SETTINGS]);
     return updated;
+  },
+
+  async deleteNavigationItem(id: string): Promise<boolean> {
+    const deleted = await navigationItemRepository.deleteById(id);
+    if (deleted) {
+      revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.SETTINGS]);
+    }
+    return deleted;
   },
 
   async createService(rawInput: unknown): Promise<ServiceDTO> {
@@ -521,6 +532,43 @@ export const portfolioService = {
     );
     await projectRepository.reorder(orderedIds);
     revalidatePortfolioCache([PORTFOLIO_CACHE_TAGS.PROJECTS]);
+  },
+
+  async reorderCollection(
+    collection:
+      | 'socialLinks'
+      | 'navigationItems'
+      | 'services'
+      | 'testimonials'
+      | 'clients'
+      | 'education'
+      | 'experience'
+      | 'skills'
+      | 'achievements'
+      | 'projects'
+      | 'blogPosts',
+    rawInput: unknown
+  ): Promise<void> {
+    const { orderedIds } = validateAndSanitize(
+      reorderItemsInputSchema,
+      rawInput
+    );
+    const repoMap = {
+      socialLinks: socialLinkRepository,
+      navigationItems: navigationItemRepository,
+      services: serviceRepository,
+      testimonials: testimonialRepository,
+      clients: clientLogoRepository,
+      education: educationRepository,
+      experience: experienceRepository,
+      skills: skillRepository,
+      achievements: achievementRepository,
+      projects: projectRepository,
+      blogPosts: blogPostRepository,
+    } as const;
+
+    await repoMap[collection].reorder(orderedIds);
+    revalidatePortfolioCache();
   },
 
   async createBlogPost(rawInput: unknown): Promise<BlogPostDTO> {

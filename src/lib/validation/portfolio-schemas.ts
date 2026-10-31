@@ -239,10 +239,23 @@ export const blogPostInputSchema = z.object({
   status: publicationStatusSchema.default('published'),
 });
 
+const noScriptTag = (val: string) =>
+  !/<\s*\/?\s*script\b/i.test(val) && !/javascript\s*:/i.test(val);
+
 export const contactMessageInputSchema = z.object({
-  fullname: z.string().trim().min(1, 'Full name is required.').max(140),
+  fullname: z
+    .string()
+    .trim()
+    .min(1, 'Full name is required.')
+    .max(140)
+    .refine(noScriptTag, 'Invalid characters in full name.'),
   email: z.string().trim().email('Valid email address is required.').max(200),
-  message: z.string().trim().min(1, 'Message is required.').max(4000),
+  message: z
+    .string()
+    .trim()
+    .min(1, 'Message is required.')
+    .max(4000)
+    .refine(noScriptTag, 'Invalid characters in message.'),
 });
 
 export const mediaAssetInputSchema = z.object({

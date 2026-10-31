@@ -14,6 +14,8 @@ export const ionIconNameSchema = z.enum([
   'book-outline',
   'eye-outline',
   'paper-plane',
+  'sunny-outline',
+  'moon-outline',
 ]);
 
 export const portfolioPageSlugSchema = z.enum([

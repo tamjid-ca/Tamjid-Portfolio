@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import type { NavigationItemDTO, PortfolioPageSlug } from '@/types/portfolio';
 
 interface NavbarProps {
@@ -37,6 +38,9 @@ export function Navbar({
             </li>
           );
         })}
+        <li className="navbar-item">
+          <ThemeToggle />
+        </li>
       </ul>
     </nav>
   );

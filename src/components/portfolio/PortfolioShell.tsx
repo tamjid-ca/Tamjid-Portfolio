@@ -9,6 +9,7 @@ import { ResumeSection } from '@/components/portfolio/ResumeSection';
 import { PortfolioSection } from '@/components/portfolio/PortfolioSection';
 import { BlogSection } from '@/components/portfolio/BlogSection';
 import { ContactSection } from '@/components/portfolio/ContactSection';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 
 interface PortfolioShellProps {
   data: PortfolioDataDTO;
@@ -40,52 +41,57 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
   };
 
   return (
-    <main>
-      <Sidebar profile={data.profile} socialLinks={data.socialLinks} />
+    <ThemeProvider
+      defaultTheme={data.siteSettings.defaultTheme}
+      enableThemeToggle={data.siteSettings.enableThemeToggle}
+    >
+      <main>
+        <Sidebar profile={data.profile} socialLinks={data.socialLinks} />
 
-      <div className="main-content">
-        <Navbar
-          navigationItems={data.navigationItems}
-          activePage={resolvedActivePage}
-          onNavigate={handleNavigate}
-        />
+        <div className="main-content">
+          <Navbar
+            navigationItems={data.navigationItems}
+            activePage={resolvedActivePage}
+            onNavigate={handleNavigate}
+          />
 
-        <AboutSection
-          isActive={resolvedActivePage === 'about'}
-          profile={data.profile}
-          services={data.services}
-          testimonials={data.testimonials}
-          clients={data.clients}
-        />
+          <AboutSection
+            isActive={resolvedActivePage === 'about'}
+            profile={data.profile}
+            services={data.services}
+            testimonials={data.testimonials}
+            clients={data.clients}
+          />
 
-        <ResumeSection
-          isActive={resolvedActivePage === 'resume'}
-          profile={data.profile}
-          education={data.education}
-          experience={data.experience}
-          skills={data.skills}
-          achievements={data.achievements}
-        />
+          <ResumeSection
+            isActive={resolvedActivePage === 'resume'}
+            profile={data.profile}
+            education={data.education}
+            experience={data.experience}
+            skills={data.skills}
+            achievements={data.achievements}
+          />
 
-        <PortfolioSection
-          isActive={resolvedActivePage === 'portfolio'}
-          profile={data.profile}
-          projects={data.projects}
-          categories={data.projectCategories}
-        />
+          <PortfolioSection
+            isActive={resolvedActivePage === 'portfolio'}
+            profile={data.profile}
+            projects={data.projects}
+            categories={data.projectCategories}
+          />
 
-        <BlogSection
-          isActive={resolvedActivePage === 'blog'}
-          profile={data.profile}
-          blogPosts={data.blogPosts}
-        />
+          <BlogSection
+            isActive={resolvedActivePage === 'blog'}
+            profile={data.profile}
+            blogPosts={data.blogPosts}
+          />
 
-        <ContactSection
-          isActive={resolvedActivePage === 'contact'}
-          profile={data.profile}
-          siteSettings={data.siteSettings}
-        />
-      </div>
-    </main>
+          <ContactSection
+            isActive={resolvedActivePage === 'contact'}
+            profile={data.profile}
+            siteSettings={data.siteSettings}
+          />
+        </div>
+      </main>
+    </ThemeProvider>
   );
 }

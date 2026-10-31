@@ -107,6 +107,90 @@
 
 }
 
+/*-----------------------------------*\
+  #LIGHT THEME OVERRIDES (PHASE 7)
+\*-----------------------------------*/
+
+[data-theme="light"] {
+  --bg-gradient-onyx: linear-gradient(
+    to bottom right,
+    hsl(40, 22%, 94%) 3%,
+    hsl(40, 18%, 89%) 97%
+  );
+  --bg-gradient-jet: linear-gradient(
+    to bottom right,
+    hsla(40, 30%, 99%, 0.92) 0%,
+    hsla(40, 20%, 96%, 0.96) 100%
+  ), hsl(0, 0%, 100%);
+  --bg-gradient-yellow-1: linear-gradient(
+    to bottom right,
+    hsl(42, 95%, 52%) 0%,
+    hsla(36, 95%, 50%, 0) 50%
+  );
+  --bg-gradient-yellow-2: linear-gradient(
+    135deg,
+    hsla(42, 95%, 55%, 0.22) 0%,
+    hsla(35, 95%, 50%, 0) 59.86%
+  ), hsl(40, 25%, 98%);
+  --border-gradient-onyx: linear-gradient(
+    to bottom right,
+    hsl(220, 14%, 82%) 0%,
+    hsla(220, 14%, 88%, 0.35) 50%
+  );
+  --text-gradient-yellow: linear-gradient(
+    to right,
+    hsl(40, 96%, 45%),
+    hsl(32, 92%, 42%)
+  );
+
+  --jet: hsl(220, 14%, 86%);
+  --onyx: hsl(40, 15%, 92%);
+  --eerie-black-1: hsl(40, 20%, 98%);
+  --eerie-black-2: hsl(0, 0%, 100%);
+  --smoky-black: hsl(40, 25%, 96%);
+  --white-1: hsl(222, 30%, 14%);
+  --white-2: hsl(222, 35%, 12%);
+  --orange-yellow-crayola: hsl(38, 92%, 42%);
+  --vegas-gold: hsl(36, 85%, 36%);
+  --light-gray: hsl(220, 18%, 28%);
+  --light-gray-70: hsla(220, 16%, 38%, 0.85);
+  --bittersweet-shimmer: hsl(0, 62%, 46%);
+
+  --shadow-1: -4px 8px 24px hsla(220, 25%, 15%, 0.08);
+  --shadow-2: 0 12px 28px hsla(220, 25%, 15%, 0.09);
+  --shadow-3: 0 14px 34px hsla(220, 25%, 15%, 0.1);
+  --shadow-4: 0 20px 44px hsla(220, 25%, 15%, 0.08);
+  --shadow-5: 0 24px 64px hsla(220, 25%, 15%, 0.1);
+}
+
+[data-theme="light"] .navbar {
+  background: hsla(0, 0%, 100%, 0.85);
+}
+
+[data-theme="light"] .select-item button:hover {
+  --eerie-black-2: hsl(40, 20%, 93%);
+}
+
+[data-theme="light"] .mapbox iframe {
+  filter: grayscale(0.15) invert(0);
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-gray);
+  font-size: 16px;
+  padding: 14px 7px;
+  border-radius: 8px;
+  transition: color var(--transition-1), transform var(--transition-1);
+}
+
+.theme-toggle-btn:hover,
+.theme-toggle-btn:focus-visible {
+  color: var(--orange-yellow-crayola);
+}
+
 
 /*-----------------------------------*\
   #RESET

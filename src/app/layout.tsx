@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
+import { buildThemeInitScript } from '@/components/theme/theme-script';
 import { getCachedPublicPortfolioData } from '@/lib/cache/portfolio-cache';
 
 const poppins = Poppins({
@@ -32,13 +33,30 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { siteSettings } = await getCachedPublicPortfolioData();
+
   return (
-    <html lang="en" className={poppins.variable}>
+    <html
+      lang="en"
+      className={poppins.variable}
+      data-theme={siteSettings.defaultTheme}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: buildThemeInitScript(
+              siteSettings.defaultTheme,
+              siteSettings.enableThemeToggle
+            ),
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

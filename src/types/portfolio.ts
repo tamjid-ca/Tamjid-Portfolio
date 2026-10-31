@@ -10,7 +10,9 @@ export type IonIconName =
   | 'close-outline'
   | 'book-outline'
   | 'eye-outline'
-  | 'paper-plane';
+  | 'paper-plane'
+  | 'sunny-outline'
+  | 'moon-outline';
 
 export type PortfolioPageSlug =
   | 'about'

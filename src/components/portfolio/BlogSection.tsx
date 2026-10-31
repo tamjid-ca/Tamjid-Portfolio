@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ProfileDTO, BlogPostDTO } from '@/types/portfolio';
+import { buildCloudinaryImageUrl } from '@/lib/cloudinary/url';
 
 interface BlogSectionProps {
   isActive: boolean;
@@ -29,7 +30,9 @@ export function BlogSection({
               <a href={post.externalUrl}>
                 <figure className="blog-banner-box">
                   <img
-                    src={post.bannerUrl}
+                    src={buildCloudinaryImageUrl(post.bannerUrl, {
+                      width: 800,
+                    })}
                     alt={post.bannerAlt}
                     loading="lazy"
                   />

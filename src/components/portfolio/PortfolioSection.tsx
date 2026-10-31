@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import type { ProfileDTO, ProjectDTO } from '@/types/portfolio';
+import { buildCloudinaryImageUrl } from '@/lib/cloudinary/url';
 import { IonIcon } from '@/components/ui/IonIcon';
 
 interface PortfolioSectionProps {
@@ -113,7 +114,9 @@ export function PortfolioSection({
                     </div>
 
                     <img
-                      src={project.thumbnailUrl}
+                      src={buildCloudinaryImageUrl(project.thumbnailUrl, {
+                        width: 640,
+                      })}
                       alt={project.thumbnailAlt}
                       loading="lazy"
                     />

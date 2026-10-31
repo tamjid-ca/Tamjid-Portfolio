@@ -11,7 +11,7 @@
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose 8.x, Zod 3.24 validation, Argon2id / `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
   - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 3 Completed** (Dynamic public portfolio wired end-to-end through `getCachedPublicPortfolioData()` using Next.js `unstable_cache` with granular cache tags, automatic tag revalidation on all service mutations, dynamic SEO metadata via `generateMetadata()`, `GET /api/public/portfolio` endpoint, and 23/23 passing tests). Ready to begin **Phase 4 — Cloudinary Integration**.
+- **Current Implementation Status:** **Phase 4 Completed** (Cloudinary server-side parameter signing, strict MIME/extension/size validation, responsive URL & `srcSet` transformation helpers, `cloudinaryMediaService` with reference-checked deletion and remote destroy, authenticated `/api/uploads/sign` and `/api/uploads/assets` endpoints, and 28/28 passing tests). Ready to begin **Phase 5 — Admin Authentication and Authorization**.
 
 ---
 
@@ -33,13 +33,12 @@
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/public/{contact,portfolio}`, `src/components/portfolio`, `src/components/ui`, `src/lib/{cache,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `tests`).
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/portfolio`, `src/components/ui`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `tests`).
 - **Component & Data Layer Architecture:**
-  - `src/lib/cache/portfolio-cache.ts` & `src/lib/cache/revalidate.ts`: Wraps `portfolioService.getPublicPortfolioData()` in Next.js `unstable_cache` with granular cache tags (`portfolio-public`, `portfolio-settings`, `portfolio-profile`, `portfolio-about`, `portfolio-resume`, `portfolio-projects`, `portfolio-blog`) and exposes `revalidatePortfolioCache()` invoked automatically on every service mutation.
-  - `src/app/layout.tsx`: Server Component implementing `generateMetadata()` driven by dynamic `SiteSettings`.
-  - `src/app/(public)/page.tsx`: Async Server Component awaiting `getCachedPublicPortfolioData()` and rendering `<PortfolioShell data={data} />`.
-  - `src/app/api/public/portfolio/route.ts`: Public portfolio snapshot & health endpoint with `Cache-Control: public, s-maxage=60, stale-while-revalidate=300`.
-  - `src/lib/mongodb/connection.ts`, `src/models/*`, `src/repositories/*`, `src/services/*`: Full MongoDB/Mongoose data & service layer with resilient fallback to `V1_PORTFOLIO_SEED_DATA`.
+  - `src/lib/cloudinary/cloudinary.ts` & `src/lib/cloudinary/url.ts`: Server-side Cloudinary parameter signing (`signCloudinaryParams`, `createSignedUploadPayload`), MIME/extension/size validation (`validateUploadFileConstraints`), and responsive image URL transformation (`buildCloudinaryImageUrl`, `buildResponsiveSrcSet`).
+  - `src/services/media-service.ts`: `cloudinaryMediaService` orchestrating signed upload creation, `MediaAsset` registration, asset listing with `referencedBy`, and reference-checked deletion (`409 Conflict` when in use) plus remote Cloudinary destroy.
+  - `src/lib/auth/request-guard.ts`: HMAC-SHA256 timing-safe admin session token verification (`verifyAdminRequest`, `createSignedSessionCookieValue`).
+  - `src/app/api/uploads/sign/route.ts` & `src/app/api/uploads/assets/route.ts`: Authenticated upload signing and media asset CRUD route handlers.
 
 ---
 
@@ -48,20 +47,21 @@
 - **Decision 2 — Inline Ionicons SVG Component:** Replaced external `unpkg.com` runtime scripts with `src/components/ui/IonIcon.tsx`, rendering crisp SVGs synchronously during SSR.
 - **Decision 3 — TypeScript Incremental Build Cache in `/tmp`:** Configured `"tsBuildInfoFile": "/tmp/tsconfig.tsbuildinfo"` in `tsconfig.json` so `npm run typecheck` executes cleanly inside sandboxed environments.
 - **Decision 4 — Deterministic Seed Keys & Natural Slugs for Idempotent Seeding:** Added `singletonKey: 'default'` on `SiteSettings`/`Profile` and `seedKey` (plus `slug` on `NavigationItem`, `Project`, `BlogPost`) so `seedDatabase()` can run repeatedly without creating duplicate documents.
-- **Decision 5 — Decoupled Cache Tag Revalidation (`src/lib/cache/revalidate.ts`):** Separated tag constants and `revalidatePortfolioCache()` into `src/lib/cache/revalidate.ts` to avoid circular imports between `portfolio-cache.ts` and `portfolio-service.ts`, while safely catching non-Next.js runtime contexts during unit tests.
+- **Decision 5 — Decoupled Cache Tag Revalidation (`src/lib/cache/revalidate.ts`):** Separated tag constants and `revalidatePortfolioCache()` into `src/lib/cache/revalidate.ts` to avoid circular imports.
+- **Decision 6 — Zero-Dependency Native Crypto Cloudinary Signing & URL Transform:** Used Node's built-in `crypto` module for Cloudinary SHA-256/SHA-1 parameter signing and pure string URL transformation (`src/lib/cloudinary/url.ts`), avoiding heavy client/server SDK bloat and keeping `CLOUDINARY_API_SECRET` strictly server-only.
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 3 Completed (Stopped at Phase 3 gate awaiting `continue with context.md` for Phase 4)
+- **Current Phase:** Phase 4 Completed (Stopped at Phase 4 gate awaiting `continue with context.md` for Phase 5)
 - **Completed Phases:**
   - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
   - [x] **Phase 1:** Next.js Foundation (`f5932b5`)
   - [x] **Phase 2:** MongoDB and Backend Foundation (`02c832f`)
-  - [x] **Phase 3:** Dynamic Public Portfolio
+  - [x] **Phase 3:** Dynamic Public Portfolio (`5b0eee6`)
+  - [x] **Phase 4:** Cloudinary Integration
 - **Pending Phases:**
-  - [ ] **Phase 4:** Cloudinary Integration (Signed uploads, media library, responsive image URLs, reference-safe deletion)
-  - [ ] **Phase 5:** Admin Authentication and Authorization (Argon2/scrypt, sessions, rate limiting, route guards)
+  - [ ] **Phase 5:** Admin Authentication and Authorization (Argon2/scrypt, `AdminUser` & `AdminSession` models, login rate limiting, CSRF verification, `/api/auth/*`, route guards, security headers)
   - [ ] **Phase 6:** Complete Admin CMS (Full CRUD dashboard for all collections, inbox, ordering, preview)
   - [ ] **Phase 7:** Dark/Light Theme (Dark default + harmonized Light mode tokens + persistence)
   - [ ] **Phase 8:** Three.js and Motion Enhancement (Lazy-loaded 3D ambient scene + reduced-motion fallback)
@@ -76,20 +76,24 @@
 - **Phase 0 Deliverables:** `docs/INITIAL_AUDIT.md`, `docs/DESIGN_INVENTORY.md`, `docs/CONTENT_INVENTORY.md`, `docs/ARCHITECTURE_PLAN.md`, `docs/screenshots/baseline/*`, `AGENTS.md`, `.agents/skills/*`, `plugins/tamjid-portfolio-engineering/`.
 - **Phase 1 Deliverables:** Next.js 15 App Router foundation, `src/app/globals.css`, `src/components/ui/IonIcon.tsx`, `src/components/portfolio/*`, `tests/portfolio-foundation.test.tsx`.
 - **Phase 2 Deliverables:** `src/lib/mongodb/connection.ts`, `src/lib/security/sanitize.ts`, `src/lib/validation/portfolio-schemas.ts`, `src/models/*` (15 models), `src/repositories/*`, `src/services/*`, `src/seed/{seed-database,cli}.ts`, `tests/mongodb-data-layer.test.ts`.
-- **Phase 3 Deliverables:**
-  - Cache & Revalidation Layer: `src/lib/cache/revalidate.ts`, `src/lib/cache/portfolio-cache.ts`.
-  - Dynamic Public Routes & Metadata: `src/app/layout.tsx` (`generateMetadata`), `src/app/(public)/page.tsx` (`async HomePage`), `src/app/api/public/portfolio/route.ts` (`GET`).
-  - Enhanced Dynamic Portfolio Components: `src/components/portfolio/PortfolioShell.tsx`, `src/components/portfolio/ResumeSection.tsx`.
-  - Phase 3 Integration & Component Tests: `tests/dynamic-public-portfolio.test.tsx`, `tests/setup.ts`.
+- **Phase 3 Deliverables:** `src/lib/cache/{revalidate,portfolio-cache}.ts`, `src/app/layout.tsx`, `src/app/(public)/page.tsx`, `src/app/api/public/portfolio/route.ts`, `tests/dynamic-public-portfolio.test.tsx`.
+- **Phase 4 Deliverables:**
+  - Cloudinary Signing & Validation: `src/lib/cloudinary/cloudinary.ts`, `src/lib/cloudinary/url.ts`, `src/lib/cloudinary/index.ts`.
+  - Media Domain Service: `src/services/media-service.ts`.
+  - Admin Request Guard: `src/lib/auth/request-guard.ts`.
+  - Upload & Media API Routes: `src/app/api/uploads/sign/route.ts`, `src/app/api/uploads/assets/route.ts`.
+  - Responsive Image URL Integration: `src/components/portfolio/{Sidebar,AboutSection,PortfolioSection,BlogSection}.tsx`.
+  - Phase 4 Tests: `tests/cloudinary-media.test.ts`.
 
 ---
 
 ## 7. Testing
-- **Phase 3 Verification Executed:**
-  - **Unit, Component & Integration Tests (`npm test`):** `3` test files passed, `23/23` tests passed:
+- **Phase 4 Verification Executed:**
+  - **Unit, Component & Integration Tests (`npm test`):** `4` test files passed, `28/28` tests passed:
     - `tests/portfolio-foundation.test.tsx` (`7/7` passed)
     - `tests/mongodb-data-layer.test.ts` (`12/12` passed)
-    - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed: dynamic `generateMetadata()` from MongoDB `SiteSettings`, `GET /api/public/portfolio` snapshot & cache headers, end-to-end async `HomePage` rendering of dynamic database mutations across Profile/Resume/Achievements/Portfolio/Blog with draft exclusion and custom category filtering, and `revalidatePortfolioCache()` tag resolution).
+    - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed)
+    - `tests/cloudinary-media.test.ts` (`5/5` passed: deterministic parameter signing, MIME/extension/size rejection, responsive URL & `srcSet` generation, `401` unauthenticated upload rejection, `201` asset registration, `referencedBy` tracking, `409 Conflict` in-use deletion block, and `200 OK` remote + DB deletion once unreferenced).
   - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
   - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
   - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly).
@@ -103,8 +107,9 @@
   - **Phase 0:** `fdf2ce7b5d219beebe0c498ac0ce93e6dd76f23f` (`docs: add project audit and design inventory`)
   - **Phase 1:** `f5932b592d2d749f051c8009bd59a8255624aded` (`feat: implement nextjs application foundation`)
   - **Phase 2:** `02c832f` (`feat: add mongodb data layer`)
-  - **Phase 3:** Committed at end of Phase 3 (`feat: implement dynamic portfolio sections`)
-- **Uncommitted Changes:** None after Phase 3 commit.
+  - **Phase 3:** `5b0eee6` (`feat: implement dynamic portfolio sections`)
+  - **Phase 4:** Committed at end of Phase 4 (`feat: integrate cloudinary media management`)
+- **Uncommitted Changes:** None after Phase 4 commit.
 
 ---
 
@@ -134,16 +139,17 @@
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 4 — Cloudinary Integration**
+- **Next Phase:** **PHASE 5 — Admin Authentication and Authorization**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Read `.agents/skills/cloudinary-media-management/SKILL.md`.
-  2. Implement server-side Cloudinary configuration, upload signature generator (SHA-1/SHA-256 parameter signing), folder conventions (`tamjid-portfolio/avatars`, `tamjid-portfolio/projects`, `tamjid-portfolio/blog`, `tamjid-portfolio/icons`, `tamjid-portfolio/certificates`, `tamjid-portfolio/clients`), MIME/extension/size validation, and responsive URL transformation helper (`f_auto,q_auto,w_...`) in `src/lib/cloudinary/cloudinary.ts`.
-  3. Implement `CloudinaryMediaService` in `src/services/media-service.ts` supporting signed upload payload creation, `MediaAsset` registration, asset listing, reference inspection (`findAssetReferences`), and reference-safe deletion (including remote Cloudinary destroy call when configured).
-  4. Implement upload/media API endpoints in `src/app/api/uploads/sign/route.ts` and `src/app/api/uploads/assets/route.ts` (with session authorization hooks ready for Phase 5).
-  5. Write and execute Phase 4 unit & integration tests (`tests/cloudinary-media.test.ts`) verifying signature generation, file type/size validation, URL transformation helpers, and reference-safe asset deletion.
-  6. Update `context.md` and commit Phase 4 (`feat: integrate cloudinary media management`).
+  1. Read `.agents/skills/secure-admin-cms/SKILL.md`.
+  2. Implement `AdminUser` and `AdminSession` Mongoose models (`src/models/AdminUser.ts`, `src/models/AdminSession.ts`) with TTL index on `expiresAt` and lockout counters (`failedLoginAttempts`, `lockedUntil`).
+  3. Implement password hashing (`crypto.scrypt` with random salt and timing-safe comparison), login rate limiting (`src/lib/auth/rate-limiter.ts`), CSRF origin verification (`src/lib/security/csrf.ts`), and `adminAuthService` (`src/services/auth-service.ts`) supporting initial admin provisioning (`seedAdminUser`), login, logout, session validation (`requireAdminSession`), and account lockout after repeated failures.
+  4. Implement `/api/auth/login/route.ts`, `/api/auth/logout/route.ts`, and `/api/auth/session/route.ts` setting `HttpOnly`, `Secure` (in production), `SameSite=Lax` session cookies.
+  5. Implement Next.js `src/middleware.ts` for `/admin/*` route protection and security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`).
+  6. Write and execute Phase 5 authentication & security tests (`tests/admin-auth.test.ts`).
+  7. Update `context.md` and commit Phase 5 (`feat: add secure admin authentication`).
 
 ---
 
 ## 13. User Feedback
-- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 2 to Phase 3. Completed Phase 3 and stopped at the Phase 3 gate awaiting `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 3 to Phase 4. Completed Phase 4 and stopped at the Phase 4 gate awaiting `continue with context.md`.

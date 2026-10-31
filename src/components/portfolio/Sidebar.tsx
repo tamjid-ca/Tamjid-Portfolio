@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import type { ProfileDTO, SocialLinkDTO } from '@/types/portfolio';
+import { buildCloudinaryImageUrl } from '@/lib/cloudinary/url';
 import { IonIcon } from '@/components/ui/IonIcon';
 
 interface SidebarProps {
@@ -21,7 +22,7 @@ export function Sidebar({ profile, socialLinks }: SidebarProps) {
       <div className="sidebar-info">
         <figure className="avatar-box">
           <img
-            src={profile.avatarUrl}
+            src={buildCloudinaryImageUrl(profile.avatarUrl, { width: 240 })}
             alt={profile.avatarAlt}
             width={80}
           />

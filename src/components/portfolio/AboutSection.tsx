@@ -7,6 +7,7 @@ import type {
   TestimonialDTO,
   ClientLogoDTO,
 } from '@/types/portfolio';
+import { buildCloudinaryImageUrl } from '@/lib/cloudinary/url';
 import { IonIcon } from '@/components/ui/IonIcon';
 
 interface AboutSectionProps {
@@ -83,7 +84,7 @@ export function AboutSection({
             <li key={service.id} className="service-item">
               <div className="service-icon-box">
                 <img
-                  src={service.iconUrl}
+                  src={buildCloudinaryImageUrl(service.iconUrl, { width: 120 })}
                   alt={service.iconAlt}
                   width={40}
                 />
@@ -119,7 +120,7 @@ export function AboutSection({
               >
                 <figure className="testimonials-avatar-box">
                   <img
-                    src={item.avatarUrl}
+                    src={buildCloudinaryImageUrl(item.avatarUrl, { width: 160 })}
                     alt={item.avatarAlt}
                     width={60}
                     data-testimonials-avatar
@@ -171,10 +172,11 @@ export function AboutSection({
           <div className="modal-img-wrapper">
             <figure className="modal-avatar-box">
               <img
-                src={
+                src={buildCloudinaryImageUrl(
                   displayedModalItem?.avatarUrl ??
-                  '/assets/images/my-avatar.jpg'
-                }
+                    '/assets/images/my-avatar.jpg',
+                  { width: 200 }
+                )}
                 alt={displayedModalItem?.avatarAlt ?? 'Client avatar'}
                 width={80}
                 data-modal-img
@@ -207,7 +209,10 @@ export function AboutSection({
           {visibleClients.map((client) => (
             <li key={client.id} className="clients-item">
               <a href={client.websiteUrl} aria-label={client.name}>
-                <img src={client.logoUrl} alt={client.logoAlt} />
+                <img
+                  src={buildCloudinaryImageUrl(client.logoUrl, { width: 320 })}
+                  alt={client.logoAlt}
+                />
               </a>
             </li>
           ))}

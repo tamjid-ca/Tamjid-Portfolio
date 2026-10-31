@@ -7,11 +7,11 @@
 - **Target Branch:** `version2`
 - **Migration Objectives:** Transform the existing static HTML/CSS/JS portfolio for **MD. Tamjid Hossain** into a production-ready, maintainable, fully dynamic, database-driven Next.js (App Router) application with MongoDB (Mongoose), Cloudinary media management, a secure Admin CMS, Dark (default) + Light themes, and subtle Three.js / WebGL motion enhancements while preserving the original website's 1:1 visual identity.
 - **Technology Stack:**
-  - **Frontend:** Next.js (App Router), React, TypeScript, preserved native CSS (`globals.css` with semantic theme custom properties), Three.js / React Three Fiber / Drei, Lucide React (Admin CMS), custom inline Ionicons v5.5.2 SVG renderer (Public Portfolio).
+  - **Frontend:** Next.js 15.5 (App Router), React 19, TypeScript 5.8, preserved native CSS (`src/app/globals.css` with semantic theme custom properties), Three.js / React Three Fiber / Drei, Lucide React (Admin CMS), custom inline Ionicons v5.5.2 SVG renderer (`src/components/ui/IonIcon.tsx`).
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose, Zod validation, Argon2id / `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
-  - **Testing:** Vitest, React Testing Library, Playwright / Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 0 Completed** (Repository Audit, Baseline Screenshots, Design/Content/Architecture Specifications, Antigravity Custom Skills & Plugin Setup). Ready to begin **Phase 1 — Next.js Foundation**.
+  - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
+- **Current Implementation Status:** **Phase 1 Completed** (Next.js App Router Foundation, 1:1 visual recreation of all public portfolio sections, inline Ionicons SVG component, `Poppins` self-hosted font, Vitest test suite, production build & multi-viewport visual verification). Ready to begin **Phase 2 — MongoDB and Backend Foundation**.
 
 ---
 
@@ -25,39 +25,36 @@
   5. **Portfolio (`article.portfolio`):** Category filter (`All`, `Web design`, `Applications`, `Web development`) with desktop button bar + mobile custom select dropdown, and 9 project cards (`Finance`, `Orizon`, `Fundo`, `Brawlhalla`, `DSM.`, `MetaSpark`, `Summary`, `Task Manager`, `Arrival`).
   6. **Blog (`article.blog`):** 4 blog post cards (`Design conferences in 2022`, `Design`, `Oct 15, 2023`).
   7. **Contact (`article.contact`):** Embedded Google Maps `<iframe>` (Skyview Ranch, Calgary, AB, Canada, styled with `grayscale(1) invert(1)`) and Contact Form (`fullname`, `email`, `message`, `Send Message` button).
-- **Responsive Behavior:** 5 `@media` min-width breakpoints (`450px`, `580px`, `768px`, `1024px`, `1250px`). Transitions from stacked full-width mobile cards (`<580px`) to centered `520px` (`>=580px`), `700px` (`>=768px`), `950px` (`>=1024px` with top-right navbar), and `1200px` side-by-side flex layout (`>=1250px` with sticky left sidebar and 75% right main content).
+- **Responsive Behavior:** 5 `@media` min-width breakpoints (`450px`, `580px`, `768px`, `1024px`, `1250px`).
 - **Design Preservation Decisions:**
-  - Preserve all original CSS custom properties, `::before` 1px gradient borders (`--border-gradient-onyx`), shadow tokens (`--shadow-1` to `--shadow-5`), and exact media queries in `src/app/globals.css`.
-  - Render exact inline SVG paths for the 12 Ionicons used in `index.html` to eliminate the external `unpkg.com` script waterfall while preserving stroke widths (`--ionicon-stroke-width`).
-  - Seed MongoDB with the exact original V1 content so the initial dynamic render matches V1 1:1.
+  - All original CSS rules and custom properties preserved in `src/app/globals.css`.
+  - `.info_more-btn span:not(.ion-icon)` scoped so the mobile `chevron-down` `<IonIcon />` span remains visible below `580px` while text `"Show Contacts"` appears at `>=580px`.
 
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin`, `src/app/api`, `src/components`, `src/lib`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`).
-- **Component Architecture:** Server Components (`page.tsx`, `layout.tsx`) fetch aggregated portfolio data on the server and pass plain serializable DTOs to focused Client Components (`PortfolioShell`, `Sidebar`, `Navbar`, `TestimonialsSection`, `PortfolioFilterGrid`, `ContactForm`, `ThemeToggle`, `AmbientBackground3D`).
-- **Database Architecture:** 16 modular Mongoose models (`SiteSettings`, `Profile`, `SocialLink`, `NavigationItem`, `Service`, `Testimonial`, `ClientLogo`, `Education`, `Experience`, `Skill`, `Achievement`, `Project`, `BlogPost`, `ContactMessage`, `MediaAsset`, `AdminUser`/`AdminSession`) with compound read indexes and `.lean()` repository queries.
-- **API Architecture:** RESTful Route Handlers under `/api/public/*`, `/api/auth/*`, `/api/admin/*`, and `/api/uploads/*` validated by centralized Zod schemas (`src/lib/validation/`).
-- **Authentication Architecture:** Seeded admin account (`AdminUser`), Argon2id/`scrypt` password hashing, server-stored `AdminSession` tokens in `HttpOnly`, `Secure`, `SameSite=Lax` cookies, IP/account login rate limiting, and independent `requireAdminSession()` verification on every mutation.
-- **Cloudinary Architecture:** Server-side upload signature generation (`src/lib/cloudinary/`), folder scoping (`portfolio/*`), `MediaAsset` metadata tracking, and reference checking across all collections before allowing asset deletion.
-- **Caching Architecture:** `unstable_cache` with `portfolio-public` and section-level tags for public portfolio reads; immediate `revalidateTag('portfolio-public')` and `revalidatePath('/')` on every Admin CMS mutation; `Cache-Control: no-store` on all `/admin` and `/api/admin` routes.
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/api/public/contact`, `src/components/portfolio`, `src/components/ui`, `src/seed`, `src/types`, `tests`).
+- **Component Architecture:**
+  - `src/app/layout.tsx` (Server Component): Configures `Poppins` font (`--font-poppins`), global metadata, and `globals.css`.
+  - `src/app/(public)/page.tsx` (Server Component): Passes serializable `PortfolioDataDTO` to `<PortfolioShell />`.
+  - `src/components/portfolio/PortfolioShell.tsx` (Client Component): Coordinates active tab state and window scroll behavior across `<Sidebar />`, `<Navbar />`, `<AboutSection />`, `<ResumeSection />`, `<PortfolioSection />`, `<BlogSection />`, and `<ContactSection />`.
+  - `src/components/ui/IonIcon.tsx`: Renders exact inline SVGs for all 12 Ionicons v5.5.2 icons used in the portfolio.
 
 ---
 
 ## 4. Engineering Decisions
-- **Decision 1 — Preserve Native CSS Rules over Full Tailwind Rewrite:** Rewriting `assets/css/style.css` (`1,882` lines of bespoke gradient pseudo-elements and 5 custom breakpoints) into utility classes risks subtle visual regressions. We preserve the original CSS architecture for public components and augment `:root` / `[data-theme="light"]` tokens for theming.
-- **Decision 2 — Inline Ionicons SVG Component:** Replaces the blocking `unpkg.com/ionicons@5.5.2` script tag with a deterministic React `<IonIcon name="..." />` SVG component matching the exact v5.5.2 paths and stroke widths.
-- **Decision 3 — Resilient Seed Fallback in Service Layer:** If `MONGODB_URI` is temporarily unreachable during static build or offline testing, `PortfolioAggregatorService` falls back cleanly to the canonical V1 seed dataset so public rendering never crashes.
-- **Decision 4 — Non-Intrusive Three.js Canvas:** 3D enhancements are dynamically imported (`ssr: false`) as a fixed background canvas (`z-index: 0`) behind `<main>` (`z-index: 1`), respecting `prefers-reduced-motion: reduce` and `SiteSettings.enableThreeD`.
+- **Decision 1 — Preserve Native CSS Rules over Full Tailwind Rewrite:** Kept all `1,882` lines of `assets/css/style.css` in `src/app/globals.css` with `.ion-icon` selector parity.
+- **Decision 2 — Inline Ionicons SVG Component:** Replaced external `unpkg.com` runtime scripts with `src/components/ui/IonIcon.tsx`, rendering crisp SVGs synchronously during SSR.
+- **Decision 3 — TypeScript Incremental Build Cache in `/tmp`:** Configured `"tsBuildInfoFile": "/tmp/tsconfig.tsbuildinfo"` in `tsconfig.json` so `npm run typecheck` executes cleanly inside sandboxed environments.
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 0 Completed (Stopped at Phase 0 gate awaiting `continue with context.md` for Phase 1)
+- **Current Phase:** Phase 1 Completed (Stopped at Phase 1 gate awaiting `continue with context.md` for Phase 2)
 - **Completed Phases:**
-  - [x] **Phase 0:** Repository Audit and Engineering Setup
+  - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
+  - [x] **Phase 1:** Next.js Foundation
 - **Pending Phases:**
-  - [ ] **Phase 1:** Next.js Foundation (Recreate V1 appearance in Next.js App Router + initial test suite)
   - [ ] **Phase 2:** MongoDB and Backend Foundation (Models, repositories, services, seed scripts, tests)
   - [ ] **Phase 3:** Dynamic Public Portfolio (Connect all public sections to MongoDB + caching)
   - [ ] **Phase 4:** Cloudinary Integration (Signed uploads, media library, reference-safe deletion)
@@ -73,30 +70,24 @@
 ---
 
 ## 6. Completed Implementation
-- **Audit & Architecture Deliverables:**
-  - `docs/INITIAL_AUDIT.md`
-  - `docs/DESIGN_INVENTORY.md`
-  - `docs/CONTENT_INVENTORY.md`
-  - `docs/ARCHITECTURE_PLAN.md`
-- **Baseline Visual Reference Screenshots:**
-  - `docs/screenshots/baseline/baseline-desktop.png` (`1440x1200`)
-  - `docs/screenshots/baseline/baseline-tablet.png` (`768x1200`)
-  - `docs/screenshots/baseline/baseline-mobile.png` (`500x1200`)
-  - `docs/screenshots/baseline/README.md`
-- **Antigravity Rules, Skills & Custom Plugin:**
-  - `AGENTS.md`
-  - `.agents/plugins.json`
-  - `.agents/skills/{portfolio-design-preservation,nextjs-architecture,mongodb-data-engineering,cloudinary-media-management,secure-admin-cms,threejs-performance,portfolio-performance-audit,regression-testing,phase-completion-and-git}/SKILL.md`
-  - `plugins/tamjid-portfolio-engineering/` (Manifest, logo, 2 rules, 3 specialist review agents, 9 skills)
+- **Phase 0 Deliverables:** `docs/INITIAL_AUDIT.md`, `docs/DESIGN_INVENTORY.md`, `docs/CONTENT_INVENTORY.md`, `docs/ARCHITECTURE_PLAN.md`, `docs/screenshots/baseline/*`, `AGENTS.md`, `.agents/skills/*`, `plugins/tamjid-portfolio-engineering/`.
+- **Phase 1 Deliverables:**
+  - Configuration: `package.json`, `tsconfig.json`, `next.config.ts`, `eslint.config.mjs`, `vitest.config.ts`, `.gitignore`, `.env.example`.
+  - Public Static Assets: `public/assets/images/{icon.svg,icon-design.svg,icon-quote.svg,my-avatar.jpg}`.
+  - Types & Seed Data: `src/types/portfolio.ts`, `src/seed/v1-portfolio-data.ts`.
+  - App Router & Global Error Handling: `src/app/layout.tsx`, `src/app/globals.css`, `src/app/(public)/layout.tsx`, `src/app/(public)/page.tsx`, `src/app/(public)/loading.tsx`, `src/app/error.tsx`, `src/app/global-error.tsx`, `src/app/not-found.tsx`, `src/app/api/public/contact/route.ts`.
+  - Portfolio UI Components: `src/components/ui/IonIcon.tsx`, `src/components/portfolio/{PortfolioShell,Sidebar,Navbar,AboutSection,ResumeSection,PortfolioSection,BlogSection,ContactSection}.tsx`.
+  - Test Suite: `tests/setup.ts`, `tests/portfolio-foundation.test.tsx`.
 
 ---
 
 ## 7. Testing
-- **Phase 0 Verification Executed:**
-  - **Git Branch & History Verification:** Confirmed `version2` created cleanly from `main` (`2da903fb089de501c39068d215f2ad941e1a6ba9`).
-  - **Original Source Integrity Check:** Verified `git diff main -- index.html assets/` is completely empty (no original code modified during Phase 0).
-  - **Baseline Screenshot Verification:** Captured and visually verified Desktop (`1440x1200`), Tablet (`768x1200`), and Mobile (`500x1200`) screenshots via Headless Chrome (`156.0.8078.76`).
-  - **Antigravity Plugin CLI Validation:** Executed `agy plugin validate plugins/tamjid-portfolio-engineering --strict` -> **Passed** (`skills 9 · agents 3 · rules 2 · hooks 0 · mcpServers 0 · sidecars 0`).
+- **Phase 1 Verification Executed:**
+  - **Unit & Component Tests (`npm test`):** `1` test file passed, `7/7` tests passed (`Sidebar` toggle, `Navbar` tab switching & scroll, `Testimonials` modal open/close/Escape, `Resume` timeline & skill progress widths, `Portfolio` desktop + mobile category filtering, `Contact` form validation & submission, `/api/public/contact` route handler validation).
+  - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
+  - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
+  - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` static prerender of `/` [`5.9 kB`], `/_not-found`, and dynamic `/api/public/contact`).
+  - **Visual Regression Check:** Captured Desktop (`1440x1200`), Tablet (`768x1200`), and Mobile (`500x1200`) screenshots of the Next.js build and verified 1:1 visual parity with `docs/screenshots/baseline/`.
 
 ---
 
@@ -104,60 +95,50 @@
 - **Active Branch:** `version2`
 - **Starting Commit (`main`):** `2da903fb089de501c39068d215f2ad941e1a6ba9`
 - **Phase Commit References:**
-  - **Phase 0:** Committed at end of Phase 0 (`docs: add project audit, design inventory, and version2 engineering setup`).
-- **Uncommitted Changes:** None after Phase 0 commit.
+  - **Phase 0:** `fdf2ce7b5d219beebe0c498ac0ce93e6dd76f23f` (`docs: add project audit and design inventory`)
+  - **Phase 1:** Committed at end of Phase 1 (`feat: implement nextjs application foundation`)
+- **Uncommitted Changes:** None after Phase 1 commit.
 
 ---
 
 ## 9. Antigravity Configuration
 - **Global Installed Plugins:** `ponytail` (`v5.3.2`)
-- **Project Custom Plugin:** `tamjid-portfolio-engineering` (`plugins/tamjid-portfolio-engineering/plugin.json`, registered via `.agents/plugins.json`, validated with `agy plugin validate --strict`)
-- **Workspace Skills Created (`.agents/skills/` & plugin):**
-  1. `portfolio-design-preservation`
-  2. `nextjs-architecture`
-  3. `mongodb-data-engineering`
-  4. `cloudinary-media-management`
-  5. `secure-admin-cms`
-  6. `threejs-performance`
-  7. `portfolio-performance-audit`
-  8. `regression-testing`
-  9. `phase-completion-and-git`
-- **Configured MCP Servers:** None required (built-in tools + headless Chrome + local CLI tools are sufficient).
+- **Project Custom Plugin:** `tamjid-portfolio-engineering` (`plugins/tamjid-portfolio-engineering/plugin.json`)
+- **Workspace Skills:** All 9 custom skills active under `.agents/skills/`.
 
 ---
 
 ## 10. Environment
 - **Required Environment Variables (Names Only):**
   - `MONGODB_URI` (Present in local `.env`)
-  - `ADMIN_SESSION_SECRET` (Required for Phase 5+; fallback generated in dev/test if unset)
-  - `ADMIN_INITIAL_EMAIL` (Required for admin provisioning seed)
-  - `ADMIN_INITIAL_PASSWORD` (Required for admin provisioning seed)
-  - `CLOUDINARY_CLOUD_NAME` (Required for Phase 4 live uploads)
-  - `CLOUDINARY_API_KEY` (Required for Phase 4 live uploads)
-  - `CLOUDINARY_API_SECRET` (Required for Phase 4 live uploads)
-  - `NEXT_PUBLIC_SITE_URL` (Optional; defaults to `http://localhost:3000` in dev / `https://tamjid-portfolio.vercel.app` in prod)
+  - `ADMIN_SESSION_SECRET`
+  - `ADMIN_INITIAL_EMAIL`
+  - `ADMIN_INITIAL_PASSWORD`
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+  - `NEXT_PUBLIC_SITE_URL`
 
 ---
 
 ## 11. Outstanding Issues
-- **Markup Quirks in Original `index.html` Documented for Phase 1/2:**
-  - Duplicate `</p>` tag in Education (`ALCA` item) will be normalized into valid JSX in Phase 1.
-  - Two empty `<li class="timeline-item">` elements in Education and `"Canda"` typo in Location are documented in `docs/CONTENT_INVENTORY.md` and will be preserved in initial seed data for 1:1 visual parity while editable/deletable in the Admin CMS.
-  - JavaScript skill has `<data value="90">60%</data>` and `width: 90%`; the `Skill` model stores both `percentageLabel` (`"60%"`) and `percentageValue` (`90`) so V1 parity is preserved until edited by the admin.
+- None blocking. `npm audit` noted upstream devDependency advisories in `eslint`/`flatted` transitive packages which do not affect production runtime bundles.
 
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 1 — Next.js Foundation**
+- **Next Phase:** **PHASE 2 — MongoDB and Backend Foundation**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Initialize `package.json`, `tsconfig.json`, `next.config.ts`, `eslint.config.mjs`, and `vitest.config.ts` on branch `version2`.
-  2. Move static assets from `assets/images/*` into `public/assets/images/*` while keeping exact URL paths (`/assets/images/...`).
-  3. Migrate `assets/css/style.css` into `src/app/globals.css` and configure `Poppins` (`300`, `400`, `500`, `600`) via `next/font/google` in `src/app/layout.tsx`.
-  4. Implement the modular public portfolio components (`Sidebar`, `Navbar`, `AboutSection`, `ResumeSection`, `PortfolioSection`, `BlogSection`, `ContactSection`, `TestimonialsModal`, `IonIcon`) backed by static typed initial data matching `index.html` 1:1.
-  5. Write and execute Phase 1 unit/component tests (Vitest + React Testing Library), run `tsc --noEmit`, `eslint`, and `next build`, and compare rendered screenshots at desktop/tablet/mobile against `docs/screenshots/baseline/`.
-  6. Update `context.md` and commit Phase 1 (`feat: implement nextjs application foundation`).
+  1. Install `mongoose` and `zod` in `package.json`.
+  2. Implement cached MongoDB connection singleton (`src/lib/mongodb/connection.ts`) with connection reuse and health status helper.
+  3. Implement centralized Zod validation schemas (`src/lib/validation/portfolio-schemas.ts`) and input sanitization utilities (`src/lib/security/sanitize.ts`).
+  4. Implement Mongoose models (`src/models/`) with explicit indexes for all portfolio collections (`SiteSettings`, `Profile`, `SocialLink`, `NavigationItem`, `Service`, `Testimonial`, `ClientLogo`, `Education`, `Experience`, `Skill`, `Achievement`, `Project`, `BlogPost`, `ContactMessage`, `MediaAsset`).
+  5. Implement typed `.lean()` repositories (`src/repositories/`) and domain services (`src/services/`) with automatic fallback to `V1_PORTFOLIO_SEED_DATA` when MongoDB is offline/unconfigured.
+  6. Implement idempotent database seed/import script (`src/seed/seed-database.ts` and CLI script `npm run seed`) that populates MongoDB with the exact V1 content without duplicating records.
+  7. Write and run comprehensive Phase 2 unit & integration tests verifying connection reuse, schema validation, repository CRUD, invalid input rejection, index definitions, and seed idempotency.
+  8. Update `context.md` and commit Phase 2 (`feat: add mongodb data layer`).
 
 ---
 
 ## 13. User Feedback
-- Initial Master Engineering Prompt received (`2026-10-30`). Executed Phase 0 only as instructed. Waiting for `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 0 to Phase 1. Completed Phase 1 and stopped at the Phase 1 gate awaiting `continue with context.md`.

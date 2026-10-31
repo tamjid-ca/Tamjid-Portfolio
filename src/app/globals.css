@@ -222,6 +222,26 @@
   );
 }
 
+.skip-to-content-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--eerie-black-2);
+  color: var(--orange-yellow-crayola);
+  border: 1px solid var(--orange-yellow-crayola);
+  font-size: var(--fs-6);
+  font-weight: var(--fw-500);
+  box-shadow: var(--shadow-3);
+  transition: top var(--transition-1);
+}
+
+.skip-to-content-link:focus {
+  top: 16px;
+}
+
 
 /*-----------------------------------*\
   #RESET

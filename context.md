@@ -11,7 +11,7 @@
   - **Backend & Data:** Next.js Route Handlers & Server Actions, MongoDB, Mongoose 8.x, Zod 3.24 validation, salted `crypto.scrypt` password hashing, signed `HttpOnly` session cookies (`AdminSession` store).
   - **Media:** Cloudinary server-signed uploads, responsive URL transformations, reference-checked deletion (`MediaAsset` store).
   - **Testing:** Vitest 3.2, React Testing Library, JSDOM, Headless Chrome visual regression.
-- **Current Implementation Status:** **Phase 8 Completed** (Lazy-loaded Three.js WebGL ambient constellation backdrop `src/components/animations/AmbientBackgroundCanvas.tsx` and `src/components/animations/AmbientBackgroundLoader.tsx` with `next/dynamic({ ssr: false })`, `siteSettings.enableThreeD` toggle support, `prefers-reduced-motion: reduce` static fallback, WebGL error boundary & context fallback, `document.hidden` visibility pause, capped mobile `dpr` & particle counts, Dark/Light theme particle color adaptation, and 47/47 passing tests across 8 test files). Ready to begin **Phase 9 — Performance, SEO and Accessibility**.
+- **Current Implementation Status:** **Phase 9 Completed** (`docs/CACHING_STRATEGY.md` documenting the 5-tier caching & on-demand invalidation architecture, `src/app/sitemap.ts`, `src/app/robots.ts`, `src/lib/seo/structured-data.ts` generating Schema.org `Person`, `WebSite`, and `ItemList` JSON-LD injected into `src/app/(public)/page.tsx`, enriched canonical/OpenGraph/Twitter metadata in `src/app/layout.tsx`, WCAG keyboard skip-to-content navigation & image loading optimization, and 52/52 passing tests across 9 test files). Ready to begin **Phase 10 — Comprehensive QA and Security Audit**.
 
 ---
 
@@ -33,10 +33,12 @@
 ---
 
 ## 3. Architecture
-- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin/{login,dashboard,[section]}`, `src/app/api/admin/{portfolio,messages}`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/components/{admin,animations,portfolio,theme,ui}`, `src/lib/{auth,cache,cloudinary,mongodb,security,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
-- **Three.js Ambient Animation Layer Architecture:**
-  - `src/components/animations/AmbientBackgroundCanvas.tsx`: Client-only Three.js `WebGLRenderer` (`powerPreference: 'low-power'`, `alpha: true`, `dpr <= 1.5`) + `BufferGeometry` + `PointsMaterial` rendering a subtle golden constellation backdrop (`z-index: 0`, `pointer-events: none`, `position: fixed; inset: 0`) that pauses when `document.hidden` is true, adapts particle color to `dark`/`light` theme, and disposes GPU buffers/materials/renderer on unmount.
-  - `src/components/animations/AmbientBackgroundLoader.tsx`: Wraps `AmbientBackgroundCanvas` with `next/dynamic(..., { ssr: false })`, `WebGLErrorBoundary`, `prefers-reduced-motion: reduce` detection, and `siteSettings.enableThreeD` gating.
+- **Directory Structure:** Modular Next.js App Router structure under `src/` (`src/app/(public)`, `src/app/admin/{login,dashboard,[section]}`, `src/app/api/admin/{portfolio,messages}`, `src/app/api/auth/{login,logout,session}`, `src/app/api/public/{contact,portfolio}`, `src/app/api/uploads/{sign,assets}`, `src/app/{sitemap,robots}.ts`, `src/components/{admin,animations,portfolio,theme,ui}`, `src/lib/{auth,cache,cloudinary,mongodb,security,seo,validation}`, `src/models`, `src/repositories`, `src/services`, `src/seed`, `src/types`, `src/middleware.ts`, `tests`).
+- **SEO, Performance & Accessibility Layer Architecture:**
+  - `docs/CACHING_STRATEGY.md`: Documents the 5-tier caching & on-demand invalidation architecture.
+  - `src/lib/seo/structured-data.ts`: Generates canonical URLs (`getCanonicalSiteUrl()`) and Schema.org `@graph` JSON-LD (`Person`, `WebSite`, `ItemList`).
+  - `src/app/sitemap.ts` & `src/app/robots.ts`: Native Next.js metadata routes serving `/sitemap.xml` and `/robots.txt` (allowing `/` and disallowing `/admin` and `/api`).
+  - `src/components/portfolio/PortfolioShell.tsx` & `src/components/portfolio/Sidebar.tsx`: WCAG keyboard skip-link (`a.skip-to-content-link` -> `#main-portfolio-content`) and explicit above-the-fold `loading="eager"` vs below-the-fold `loading="lazy"` image attributes.
 
 ---
 
@@ -50,12 +52,12 @@
 - **Decision 7 — Dual-Layer Admin Session Security (Signed Cookie + Server-Revocable DB Session):** Combined HMAC-SHA256 signed `HttpOnly` cookies (for fast Edge Middleware checks) with server-backed `AdminSession` records in MongoDB verified by `adminAuthService.requireAdminSession()` on every API route and mutation.
 - **Decision 8 — Strict CSS & Bundle Isolation for `/admin`:** Placed all Admin CMS styling inside `src/app/admin/admin.css` scoped under `.admin-cms-root` and `.admin-*` class names so the public portfolio stylesheet (`src/app/globals.css`) and public bundle remain completely untouched.
 - **Decision 9 — Zero-Dependency Custom Property Theme System with Inline FOUC Script:** Implemented Dark/Light theming via `[data-theme]` CSS custom property overrides in `src/app/globals.css` paired with `buildThemeInitScript()` in `src/app/layout.tsx`.
-- **Decision 10 — Direct Three.js WebGL Scene Lazy-Loaded via `next/dynamic` (`ssr: false`):** Used `three` directly with `next/dynamic` (`ssr: false`) rather than bundling heavy R3F reconcilers into the React 19 tree, keeping initial First Load JS at `110 kB` while providing full GPU lifecycle control and zero layout shift (`CLS = 0`).
+- **Decision 10 — Direct Three.js WebGL Scene Lazy-Loaded via `next/dynamic` (`ssr: false`):** Used `three` directly with `next/dynamic` (`ssr: false`) rather than bundling heavy R3F reconcilers into the React 19 tree, keeping initial First Load JS at `111 kB` while providing full GPU lifecycle control and zero layout shift (`CLS = 0`).
 
 ---
 
 ## 5. Phase Tracker
-- **Current Phase:** Phase 8 Completed (Stopped at Phase 8 gate awaiting `continue with context.md` for Phase 9)
+- **Current Phase:** Phase 9 Completed (Stopped at Phase 9 gate awaiting `continue with context.md` for Phase 10)
 - **Completed Phases:**
   - [x] **Phase 0:** Repository Audit and Engineering Setup (`fdf2ce7`)
   - [x] **Phase 1:** Next.js Foundation (`f5932b5`)
@@ -65,11 +67,11 @@
   - [x] **Phase 5:** Admin Authentication and Authorization (`b5d8944`)
   - [x] **Phase 6:** Complete Admin CMS (`bf89572`)
   - [x] **Phase 7:** Dark/Light Theme (`2250811`)
-  - [x] **Phase 8:** Three.js and Motion Enhancement
+  - [x] **Phase 8:** Three.js and Motion Enhancement (`21d4743`)
+  - [x] **Phase 9:** Performance, SEO and Accessibility
 - **Pending Phases:**
-  - [ ] **Phase 9:** Performance, SEO and Accessibility (Metadata, sitemap, robots, JSON-LD structured data, caching strategy doc, CWV & WCAG audit)
-  - [ ] **Phase 10:** Comprehensive QA and Security Audit (Full test suite + QA/Security/Performance/Deployment docs)
-  - [ ] **Phase 11:** Production Readiness (Final verification & production readiness report)
+  - [ ] **Phase 10:** Comprehensive QA and Security Audit (Full regression test suite + `docs/FINAL_QA_REPORT.md`, `docs/SECURITY_REVIEW.md`, `docs/PERFORMANCE_REPORT.md`, `docs/DEPLOYMENT_GUIDE.md`)
+  - [ ] **Phase 11:** Production Readiness (Final verification, `README.md` update & production readiness commit)
 - **Blocked Tasks:** None.
 
 ---
@@ -83,16 +85,18 @@
 - **Phase 5 Deliverables:** `src/models/{AdminUser,AdminSession}.ts`, `src/lib/auth/{password,rate-limiter,request-guard}.ts`, `src/lib/security/csrf.ts`, `src/services/auth-service.ts`, `src/app/api/auth/{login,logout,session}/route.ts`, `src/middleware.ts`, `tests/admin-auth.test.ts`.
 - **Phase 6 Deliverables:** `src/app/api/admin/{portfolio,messages}/route.ts`, `src/app/admin/{layout,admin.css}`, `src/app/admin/login/page.tsx`, `src/app/admin/dashboard/page.tsx`, `src/app/admin/[section]/page.tsx`, `src/components/admin/{AdminLoginForm,AdminDashboardClient}.tsx`, `tests/admin-cms.test.tsx`.
 - **Phase 7 Deliverables:** `src/app/globals.css` (`[data-theme="light"]`), `src/components/theme/{theme-script,ThemeProvider,ThemeToggle}.tsx`, `tests/theme-system.test.tsx`.
-- **Phase 8 Deliverables:**
-  - Three.js Ambient Components: `src/components/animations/AmbientBackgroundCanvas.tsx`, `src/components/animations/AmbientBackgroundLoader.tsx`.
-  - Backdrop Styles & Shell Integration: `.ambient-bg-canvas` / `.ambient-bg-fallback` in `src/app/globals.css`, `<AmbientBackgroundLoader />` in `src/components/portfolio/PortfolioShell.tsx`.
-  - Phase 8 Tests: `tests/threejs-ambient.test.tsx`.
+- **Phase 8 Deliverables:** `src/components/animations/{AmbientBackgroundCanvas,AmbientBackgroundLoader}.tsx`, `tests/threejs-ambient.test.tsx`.
+- **Phase 9 Deliverables:**
+  - Caching Documentation: `docs/CACHING_STRATEGY.md`.
+  - SEO Metadata & Structured Data: `src/lib/seo/structured-data.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/layout.tsx`, `src/app/(public)/page.tsx`.
+  - Accessibility & Image Priority: `src/components/portfolio/PortfolioShell.tsx`, `src/components/portfolio/Sidebar.tsx`, `.skip-to-content-link` in `src/app/globals.css`.
+  - Phase 9 Tests: `tests/performance-seo-a11y.test.tsx`.
 
 ---
 
 ## 7. Testing
-- **Phase 8 Verification Executed:**
-  - **Unit, Component & Integration Tests (`npm test`):** `8` test files passed, `47/47` tests passed:
+- **Phase 9 Verification Executed:**
+  - **Unit, Component & Integration Tests (`npm test`):** `9` test files passed, `52/52` tests passed:
     - `tests/portfolio-foundation.test.tsx` (`7/7` passed)
     - `tests/mongodb-data-layer.test.ts` (`12/12` passed)
     - `tests/dynamic-public-portfolio.test.tsx` (`4/4` passed)
@@ -100,10 +104,11 @@
     - `tests/admin-auth.test.ts` (`5/5` passed)
     - `tests/admin-cms.test.tsx` (`5/5` passed)
     - `tests/theme-system.test.tsx` (`5/5` passed)
-    - `tests/threejs-ambient.test.tsx` (`4/4` passed: `enableThreeD: false` suppression, `prefers-reduced-motion: reduce` static fallback, missing WebGL context fallback, and `PortfolioShell` layout preservation).
+    - `tests/threejs-ambient.test.tsx` (`4/4` passed)
+    - `tests/performance-seo-a11y.test.tsx` (`5/5` passed: `sitemap.xml` generation, `robots.txt` rules disallowing `/admin` & `/api`, Schema.org `Person`/`WebSite`/`ItemList` JSON-LD injection, enriched `generateMetadata()`, and WCAG skip-link, landmark, & image `loading` attribute verification).
   - **TypeScript (`npm run typecheck`):** Passed (`tsc --noEmit` -> 0 errors).
   - **ESLint (`npm run lint`):** Passed (`eslint src tests` -> 0 errors, 0 warnings).
-  - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly).
+  - **Production Build (`npm run build`):** Passed (`Next.js 15.5.28` build succeeded cleanly, prerendering `/`, `/robots.txt`, and `/sitemap.xml`).
 
 ---
 
@@ -119,8 +124,9 @@
   - **Phase 5:** `b5d8944` (`feat: add secure admin authentication`)
   - **Phase 6:** `bf89572` (`feat: implement admin cms`)
   - **Phase 7:** `2250811` (`feat: add dark and light themes`)
-  - **Phase 8:** Committed at end of Phase 8 (`feat: integrate optimized threejs animations`)
-- **Uncommitted Changes:** None after Phase 8 commit.
+  - **Phase 8:** `21d4743` (`feat: integrate optimized threejs animations`)
+  - **Phase 9:** Committed at end of Phase 9 (`perf: optimize rendering and caching`)
+- **Uncommitted Changes:** None after Phase 9 commit.
 
 ---
 
@@ -150,18 +156,22 @@
 ---
 
 ## 12. Next Actions
-- **Next Phase:** **PHASE 9 — Performance, SEO and Accessibility**
+- **Next Phase:** **PHASE 10 — Comprehensive QA and Security Audit**
 - **Exact Next Tasks when user issues `continue with context.md`:**
-  1. Read `.agents/skills/portfolio-performance-audit/SKILL.md` and create `docs/CACHING_STRATEGY.md` documenting ISR/tag-based caching (`unstable_cache`, `PORTFOLIO_CACHE_TAGS`, `revalidatePortfolioCache()`), Admin bypass (`force-dynamic` + `no-store`), and Cloudinary CDN delivery.
-  2. Implement dynamic SEO routes and structured data:
-     - `src/app/sitemap.ts` generating canonical sitemap entries for the public portfolio.
-     - `src/app/robots.ts` allowing `/` and disallowing `/admin` and `/api`.
-     - `src/lib/seo/structured-data.ts` generating Schema.org `Person` and `WebSite` JSON-LD injected into `src/app/(public)/page.tsx` and enriched canonical/Twitter/OpenGraph metadata in `src/app/layout.tsx`.
-  3. Audit and enhance WCAG accessibility (skip-to-content link, semantic landmarks, focus-visible outlines, ARIA attributes on tabs/modals/filters) without altering original visual layout proportions.
-  4. Write and execute Phase 9 unit/integration tests (`tests/performance-seo-a11y.test.tsx`).
-  5. Update `context.md` and commit Phase 9 (`perf: optimize rendering and caching`).
+  1. Read `.agents/skills/regression-testing/SKILL.md` and `.agents/skills/secure-admin-cms/SKILL.md`.
+  2. Write end-to-end production regression and security audit tests (`tests/production-regression.test.tsx`) covering:
+     - Full visual & functional parity of all 5 public tabs (`About`, `Resume`, `Portfolio`, `Blog`, `Contact`) against V1 design invariants (`--smoky-black`, `--eerie-black-2`, `--orange-yellow-crayola`, `--border-gradient-onyx`, 5 responsive breakpoints).
+     - Full security boundary audit (NoSQL operator stripping `$gt`/`$ne`, XSS script tag rejection, CSRF origin rejection, rate-limit brute-force lockout, unauthorized API mutation rejection across all `/api/admin/*` and `/api/uploads/*` routes, and reference-locked media deletion protection).
+     - Full Admin-to-Public live data lifecycle (creating/updating/publishing/unpublishing/reordering content and verifying immediate public reflection & cache tag invalidation).
+  3. Create the required engineering audit & operational documentation:
+     - `docs/FINAL_QA_REPORT.md`
+     - `docs/SECURITY_REVIEW.md`
+     - `docs/PERFORMANCE_REPORT.md`
+     - `docs/DEPLOYMENT_GUIDE.md`
+  4. Run all verification suites (`npm test`, `npm run typecheck`, `npm run lint`, `npm run build`).
+  5. Update `context.md` and commit Phase 10 (`test: add production regression coverage`).
 
 ---
 
 ## 13. User Feedback
-- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 7 to Phase 8. Completed Phase 8 and stopped at the Phase 8 gate awaiting `continue with context.md`.
+- `2026-10-30`: User issued `continue with context.md` to proceed from Phase 8 to Phase 9. Completed Phase 9 and stopped at the Phase 9 gate awaiting `continue with context.md`.

@@ -25,6 +25,8 @@ export function Sidebar({ profile, socialLinks }: SidebarProps) {
             src={buildCloudinaryImageUrl(profile.avatarUrl, { width: 240 })}
             alt={profile.avatarAlt}
             width={80}
+            loading="eager"
+            decoding="async"
           />
         </figure>
 

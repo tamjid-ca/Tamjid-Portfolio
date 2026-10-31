@@ -3,6 +3,7 @@ import { Poppins } from 'next/font/google';
 import './globals.css';
 import { buildThemeInitScript } from '@/components/theme/theme-script';
 import { getCachedPublicPortfolioData } from '@/lib/cache/portfolio-cache';
+import { getCanonicalSiteUrl } from '@/lib/seo/structured-data';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -12,12 +13,22 @@ const poppins = Poppins({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { siteSettings } = await getCachedPublicPortfolioData();
+  const { siteSettings, profile } = await getCachedPublicPortfolioData();
+  const siteUrl = getCanonicalSiteUrl();
+  const ogImage = siteSettings.ogImageUrl || profile.avatarUrl;
 
   return {
+    metadataBase: new URL(siteUrl),
     title: siteSettings.siteTitle,
     description: siteSettings.siteDescription,
     keywords: siteSettings.seoKeywords,
+    alternates: {
+      canonical: '/',
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
     icons: {
       icon: siteSettings.faviconUrl,
       shortcut: siteSettings.faviconUrl,
@@ -25,10 +36,16 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: siteSettings.siteTitle,
       description: siteSettings.siteDescription,
+      url: siteUrl,
+      siteName: siteSettings.siteTitle,
       type: 'website',
-      ...(siteSettings.ogImageUrl
-        ? { images: [{ url: siteSettings.ogImageUrl }] }
-        : {}),
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: siteSettings.siteTitle,
+      description: siteSettings.siteDescription,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
   };
 }

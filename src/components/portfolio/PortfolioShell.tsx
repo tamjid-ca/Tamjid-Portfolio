@@ -47,10 +47,17 @@ export function PortfolioShell({ data }: PortfolioShellProps) {
       enableThemeToggle={data.siteSettings.enableThemeToggle}
     >
       <AmbientBackgroundLoader enabled={data.siteSettings.enableThreeD} />
+      <a href="#main-portfolio-content" className="skip-to-content-link">
+        Skip to main content
+      </a>
       <main>
         <Sidebar profile={data.profile} socialLinks={data.socialLinks} />
 
-        <div className="main-content">
+        <div
+          className="main-content"
+          id="main-portfolio-content"
+          tabIndex={-1}
+        >
           <Navbar
             navigationItems={data.navigationItems}
             activePage={resolvedActivePage}

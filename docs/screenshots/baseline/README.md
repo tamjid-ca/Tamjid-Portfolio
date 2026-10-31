@@ -1,0 +1,1 @@
+# Baseline Screenshots Directory
